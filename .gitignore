@@ -1,0 +1,13 @@
+/.HA_VERSION
+/.storage
+/custom_components
+/node-red
+
+/secrets.yaml
+
+*.log
+*.log.*
+
+*.db
+*.db-shm
+*.db-wal

@@ -1,0 +1,44 @@
+esphome:
+  name: "${type_prefix_host}-${device_name}"
+
+# Enable logging
+logger:
+  baud_rate: 0
+
+# Enable Home Assistant API
+api:
+
+# Enable webserver (required for prometheus)
+web_server:
+  auth:
+    username: !secret web_user
+    password: !secret web_password
+
+prometheus:
+
+ota:
+  password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "${type_prefix_host}-${device_name}"
+    password: !secret backup_ap_password
+
+captive_portal:
+
+button:
+  - platform: safe_mode
+    name: "${friendly_name} ${type_prefix} Restart in Safe Mode"
+
+binary_sensor:
+  - platform: status
+    name: "${friendly_name} ${type_prefix} Status"
+
+sensor:
+  - platform: wifi_signal
+    name: "${friendly_name} ${type_prefix} WiFi Signal"
+    update_interval: 60s

@@ -1,0 +1,6 @@
+substitutions:
+  friendly_name: "Office"
+  device_name: "office"
+
+packages:
+  airgradient: !include base-airgradient.yaml

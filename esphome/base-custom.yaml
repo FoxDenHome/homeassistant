@@ -1,0 +1,6 @@
+substitutions:
+  type_prefix: "Custom"
+  type_prefix_host: "custom"
+
+packages:
+  common: !include base-common.yaml

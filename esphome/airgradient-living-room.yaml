@@ -1,0 +1,6 @@
+substitutions:
+  friendly_name: "Living room"
+  device_name: "living-room"
+
+packages:
+  airgradient: !include base-airgradient.yaml

@@ -1,0 +1,274 @@
+substitutions:
+  friendly_name: "Office Switcher"
+  device_name: "office-switcher"
+
+packages:
+  custom: !include base-custom.yaml
+
+esp32:
+  board: nodemcu-32s
+  framework:
+    type: arduino
+
+light:
+  - platform: rgb
+    name: "${friendly_name} Button 1 LED"
+    id: button1_led
+    red: button1_r
+    green: button1_g
+    blue: button1_b
+    default_transition_length: 0.1s
+  - platform: rgb
+    name: "${friendly_name} Button 2 LED"
+    id: button2_led
+    red: button2_r
+    green: button2_g
+    blue: button2_b
+    default_transition_length: 0.1s
+  - platform: rgb
+    name: "${friendly_name} Button 3 LED"
+    id: button3_led
+    red: button3_r
+    green: button3_g
+    blue: button3_b
+    default_transition_length: 0.1s
+  - platform: rgb
+    name: "${friendly_name} Button 4 LED"
+    id: button4_led
+    red: button4_r
+    green: button4_g
+    blue: button4_b
+    default_transition_length: 0.1s
+output:
+  - platform: ledc
+    id: button1_r
+    pin: 21
+    inverted: true
+  - platform: ledc
+    id: button1_g
+    pin: 19
+    inverted: true
+  - platform: ledc
+    id: button1_b
+    pin: 18
+    inverted: true
+  - platform: ledc
+    id: button2_r
+    pin: 14
+    inverted: true
+  - platform: ledc
+    id: button2_g
+    pin: 12
+    inverted: true
+  - platform: ledc
+    id: button2_b
+    pin: 13
+    inverted: true
+  - platform: ledc
+    id: button3_r
+    pin: 33
+    inverted: true
+  - platform: ledc
+    id: button3_g
+    pin: 25
+    inverted: true
+  - platform: ledc
+    id: button3_b
+    pin: 26
+    inverted: true
+  - platform: ledc
+    id: button4_r
+    pin: 5
+    inverted: true
+  - platform: ledc
+    id: button4_g
+    pin: 17
+    inverted: true
+  - platform: ledc
+    id: button4_b
+    pin: 16
+    inverted: true
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: 23
+      mode:
+        input: true
+        pulldown: true
+    name: "${friendly_name} Button 1"
+    internal: true
+    on_multi_click:
+      - timing:
+        - ON for at most 1s
+        then:
+          - light.turn_on:
+              id: button1_led
+              brightness: 20%
+              red: 0%
+              green: 100%
+              blue: 0%
+          - homeassistant.service:
+              service: switch.turn_on
+              data:
+                entity_id: switch.dori_pc_relay
+      - timing:
+        - ON for at least 2s
+        then:
+          - light.turn_on:
+              id: button1_led
+              brightness: 20%
+              red: 100%
+              green: 0%
+              blue: 0%
+          - homeassistant.service:
+              service: switch.turn_off
+              data:
+                entity_id: switch.dori_pc_relay
+  - platform: gpio
+    pin:
+      number: 27
+      mode:
+        input: true
+        pulldown: true
+    name: "${friendly_name} Button 2"
+    internal: true
+    on_multi_click:
+      - timing:
+        - ON for at most 1s
+        - OFF for at least 0.3s
+        then:
+          - light.turn_on:
+              id: button2_led
+              brightness: 20%
+              red: 0%
+              green: 100%
+              blue: 0%
+              transition_length: 1s
+          - homeassistant.service:
+              service: light.turn_on
+              data:
+                entity_id: light.office
+      - timing:
+        - ON for at least 2s
+        then:
+          - light.turn_on:
+              id: button2_led
+              brightness: 20%
+              red: 100%
+              green: 0%
+              blue: 0%
+              transition_length: 1s
+          - homeassistant.service:
+              service: light.turn_off
+              data:
+                entity_id: light.office
+      - timing:
+        - ON for at most 1s
+        - OFF for at most 0.2s
+        - ON for at most 1s
+        then:
+          - light.turn_on:
+              id: button2_led
+              brightness: 20%
+              red: 0%
+              green: 100%
+              blue: 0%
+              transition_length: 1s
+          - homeassistant.service:
+              service: light.turn_on
+              data:
+                entity_id: light.office
+                profile: relax
+  - platform: gpio
+    pin:
+      number: 22
+      mode:
+        input: true
+        pulldown: true
+    name: "${friendly_name} Button 3"
+    internal: true
+    on_multi_click:
+      - timing:
+        - ON for at least 2s
+        then:
+          - light.turn_on:
+              id: button3_led
+              brightness: 20%
+              red: 100%
+              green: 0%
+              blue: 0%
+              transition_length: 1s
+          - homeassistant.service:
+              service: button.press
+              data:
+                entity_id: button.office_ceiling_fan_off
+      - timing:
+        - ON for at most 1s
+        - OFF for at least 0.3s
+        then:
+          - light.turn_on:
+              id: button3_led
+              brightness: 20%
+              red: 86%
+              green: 100%
+              blue: 0%
+              transition_length: 1s
+          - homeassistant.service:
+              service: button.press
+              data:
+                entity_id: button.office_ceiling_fan_low_speed
+      - timing:
+        - ON for at most 1s
+        - OFF for at most 0.2s
+        - ON for at most 1s
+        - OFF for at least 0.3s
+        then:
+          - light.turn_on:
+              id: button3_led
+              brightness: 20%
+              red: 0%
+              green: 100%
+              blue: 0%
+              transition_length: 1s
+          - homeassistant.service:
+              service: button.press
+              data:
+                entity_id: button.office_ceiling_fan_medium_speed
+      - timing:
+        - ON for at most 1s
+        - OFF for at most 0.2s
+        - ON for at most 1s
+        - OFF for at most 0.2s
+        - ON for at most 1s
+        then:
+          - light.turn_on:
+              id: button3_led
+              brightness: 20%
+              red: 0%
+              green: 0%
+              blue: 100%
+              transition_length: 1s
+          - homeassistant.service:
+              service: button.press
+              data:
+                entity_id: button.office_ceiling_fan_high_speed
+      - timing:
+        - ON for at most 1s
+        - OFF for at most 0.2s
+        - ON for at least 2s
+        then:
+          - homeassistant.service:
+              service: button.press
+              data:
+                entity_id: button.office_ceiling_fan_light
+  - platform: gpio
+    pin:
+      number: 0
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    name: "${friendly_name} Button 4"
+    internal: true
+
