@@ -1,0 +1,49 @@
+substitutions:
+  friendly_name: "RF bridge"
+  device_name: "rf-bridge"
+
+packages:
+  custom: !include base-custom.yaml
+  
+esp8266:
+  board: d1_mini
+
+esphome:
+  libraries:
+    - SPI
+    - "SmartRC-CC1101-Driver-Lib"
+  includes:
+    - components/cc1101.h
+
+custom_component:
+  - lambda: |-
+      auto cc1101 = new CC1101Transceiver(D5, D6, D7, D8, D1, D2);
+      return {cc1101};
+    components:
+      - id: cc1101
+  
+remote_transmitter:
+  - id: cc1101_tx
+    pin: D1
+    carrier_duty_percent: 100%
+
+api:
+  services:
+    - service: cc1101_send
+      variables:
+        frequency: float
+        code: int[]
+        repeat_times: float
+        repeat_wait_time: float
+      then:
+        - lambda: |-
+            ((CC1101Transceiver *)cc1101)->setMHZ(frequency);
+            ((CC1101Transceiver *)cc1101)->beginTransmission();
+        - remote_transmitter.transmit_raw:
+            code: !lambda 'return code;'
+            repeat:
+              times: !lambda 'return repeat_times;'
+              wait_time: !lambda 'return repeat_wait_time;'
+            transmitter_id: cc1101_tx
+        - lambda: |-
+            ((CC1101Transceiver *)cc1101)->endTransmission();
