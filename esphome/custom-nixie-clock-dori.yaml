@@ -31,7 +31,7 @@ time:
             tm now_tm;
             time_t now = id(time_source).now().timestamp;
             localtime_r(&now, &now_tm);
-            sprintf(str, "^T%02d%02d%02d%02d%02d%02d\n", now_tm.tm_hour, now_tm.tm_min, now_tm.tm_sec, now_tm.tm_mday, now_tm.tm_mon + 1, now_tm.tm_year % 100);
+            snprintf(str, 64, "^T%02d%02d%02d%02d%02d%02d\n", now_tm.tm_hour, now_tm.tm_min, now_tm.tm_sec, now_tm.tm_mday, now_tm.tm_mon + 1, now_tm.tm_year % 100);
             id(uart_main).write_str(str);
 
 api:
@@ -47,5 +47,5 @@ api:
       then:
         - lambda: |-
             char str[64];
-            sprintf(str, "^F%08d%03s% 9s%02x%02x%02x\n", duration, dots.c_str(), text.c_str(), red, green, blue);
+            snprintf(str, 64, "^F%08d%03s% 9s%02x%02x%02x\n", duration, dots.c_str(), text.c_str(), red, green, blue);
             id(uart_main).write_str(str);
