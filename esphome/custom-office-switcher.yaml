@@ -148,7 +148,7 @@ binary_sensor:
           - homeassistant.service:
               service: light.turn_on
               data:
-                entity_id: light.office
+                area_id: office
       - timing:
         - ON for at least 2s
         then:
@@ -162,7 +162,7 @@ binary_sensor:
           - homeassistant.service:
               service: light.turn_off
               data:
-                entity_id: light.office
+                area_id: office
       - timing:
         - ON for at most 1s
         - OFF for at most 0.2s
@@ -178,7 +178,7 @@ binary_sensor:
           - homeassistant.service:
               service: light.turn_on
               data:
-                entity_id: light.office
+                area_id: office
                 profile: relax
   - platform: gpio
     pin:
