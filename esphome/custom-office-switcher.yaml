@@ -179,7 +179,10 @@ binary_sensor:
               service: light.turn_on
               data:
                 area_id: office
-                profile: relax
+          - homeassistant.service:
+              service: button.press
+              data:
+                entity_id: button.office_lighting_apply_adaptive
   - platform: gpio
     pin:
       number: 22
