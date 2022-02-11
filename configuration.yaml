@@ -20,11 +20,7 @@ prometheus:
 
 recorder:
     auto_purge: true
-    purge_keep_days: 2
-    include:
-      domains:
-        - switch
-        - sensor
+    purge_keep_days: 7
 
 sensor:
   - platform: command_line

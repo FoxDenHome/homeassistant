@@ -37,12 +37,35 @@ sensor:
     uart_id: uart_pms5003
     pm_1_0:
       name: "${friendly_name} Particulate Matter <1.0µm Concentration"
+      filters:
+        - median:
+            window_size: 60
+            send_every: 60
     pm_2_5:
       name: "${friendly_name} Particulate Matter <2.5µm Concentration"
+      filters:
+        - median:
+            window_size: 60
+            send_every: 60
     pm_10_0:
       name: "${friendly_name} Particulate Matter <10.0µm Concentration"
+      filters:
+        - median:
+            window_size: 60
+            send_every: 60
   - platform: senseair
+    id: senseair_co2_sensor
     uart_id: uart_senseair
     co2:
       name: "${friendly_name} CO2"
+      id: senseair_co2_value
     update_interval: 60s
+
+api:
+  services:
+    - service: calibrate_co2
+      then:
+        - senseair.background_calibration: senseair_co2_sensor
+    - service: disable_co2_abc
+      then:
+        - senseair.abc_disable: senseair_co2_sensor
