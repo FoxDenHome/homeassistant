@@ -254,4 +254,29 @@ binary_sensor:
         pullup: true
     name: "${friendly_name} Button 4"
     internal: true
-
+    on_multi_click:
+      - timing:
+        - ON for at least 2s
+        then:
+          - homeassistant.service:
+              service: button.press
+              data:
+                entity_id: button.office_desk_stop
+      - timing:
+        - ON for at most 1s
+        - OFF for at least 0.3s
+        then:
+          - homeassistant.service:
+              service: button.press
+              data:
+                entity_id: button.office_desk_sitting
+      - timing:
+        - ON for at most 1s
+        - OFF for at most 0.2s
+        - ON for at most 1s
+        - OFF for at least 0.3s
+        then:
+          - homeassistant.service:
+              service: button.press
+              data:
+                entity_id: button.office_desk_standing
