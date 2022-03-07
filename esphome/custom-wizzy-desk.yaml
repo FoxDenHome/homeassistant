@@ -34,7 +34,7 @@ output:
   - platform: gpio
     id: button_bit1
     pin:
-      number: D3
+      number: D5
       inverted: true
       mode:
         output: true
