@@ -1,0 +1,102 @@
+substitutions:
+  friendly_name: "Wizzy Desk"
+  device_name: "wizzy-desk"
+
+packages:
+  custom: !include base-custom.yaml
+
+esp8266:
+  board: d1_mini
+
+esphome:
+  includes:
+    - components/uplift-uart.h
+
+uart:
+  - rx_pin:
+      number: D1
+      mode:
+        input: true
+        pullup: false
+        pulldown: false
+    baud_rate: 9600
+    id: uart_desk
+
+output:
+  - platform: gpio
+    id: button_bit4
+    pin:
+      number: D2
+      inverted: true
+      mode:
+        output: true
+        open_drain: true
+  - platform: gpio
+    id: button_bit1
+    pin:
+      number: D3
+      inverted: true
+      mode:
+        output: true
+        open_drain: true
+  - platform: gpio
+    id: button_bit2
+    pin:
+      number: D4
+      inverted: true
+      mode:
+        output: true
+        open_drain: true
+
+button:
+  - platform: template
+    name: "${friendly_name} Profile 1"
+    on_press:
+      - output.turn_on: button_bit1
+      - output.turn_on: button_bit2
+      - delay: 1s
+      - output.turn_off: button_bit2
+      - output.turn_off: button_bit1
+  - platform: template
+    name: "${friendly_name} Profile 2"
+    on_press:
+      - output.turn_on: button_bit4
+      - delay: 100ms
+      - output.turn_off: button_bit4
+  - platform: template
+    name: "${friendly_name} Profile 3"
+    on_press:
+      - output.turn_on: button_bit1
+      - output.turn_on: button_bit4
+      - delay: 100ms
+      - output.turn_off: button_bit4
+      - output.turn_off: button_bit1
+  - platform: template
+    name: "${friendly_name} Profile 4"
+    on_press:
+      - output.turn_on: button_bit4
+      - output.turn_on: button_bit2
+      - delay: 100ms
+      - output.turn_off: button_bit2
+      - output.turn_off: button_bit4
+  - platform: template
+    name: "${friendly_name} Profile 5"
+    on_press:
+      - output.turn_on: button_bit1
+      - output.turn_on: button_bit2
+      - output.turn_on: button_bit4
+      - delay: 100ms
+      - output.turn_off: button_bit4
+      - output.turn_off: button_bit2
+      - output.turn_off: button_bit1
+
+sensor:
+  - platform: template
+    name: "${friendly_name} Height"
+    id: desk_height
+    unit_of_measurement: "mm"
+
+custom_component:
+- lambda: |-
+    auto desk_serial = new UpliftDeskSerialComponent(id(uart_desk));
+    return {desk_serial};
