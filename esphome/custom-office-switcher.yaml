@@ -261,15 +261,16 @@ binary_sensor:
           - homeassistant.service:
               service: button.press
               data:
-                entity_id: button.office_desk_stop
+                entity_id: button.office_desk_height_stop
       - timing:
         - ON for at most 1s
         - OFF for at least 0.3s
         then:
           - homeassistant.service:
-              service: button.press
+              service: number.set_value
               data:
-                entity_id: button.office_desk_sitting
+                entity_id: number.office_desk_height_control
+                value: "700"
       - timing:
         - ON for at most 1s
         - OFF for at most 0.2s
@@ -277,6 +278,7 @@ binary_sensor:
         - OFF for at least 0.3s
         then:
           - homeassistant.service:
-              service: button.press
+              service: number.set_value
               data:
-                entity_id: button.office_desk_standing
+                entity_id: number.office_desk_height_control
+                value: "1150"

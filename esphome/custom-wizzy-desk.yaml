@@ -47,6 +47,22 @@ output:
       mode:
         output: true
         open_drain: true
+  - platform: gpio
+    id: button_m
+    pin:
+      number: D6
+      inverted: true
+      mode:
+        output: true
+        open_drain: true
+  - platform: gpio
+    id: io_unused
+    pin:
+      number: D7
+      inverted: true
+      mode:
+        output: true
+        open_drain: true
 
 button:
   - platform: template
