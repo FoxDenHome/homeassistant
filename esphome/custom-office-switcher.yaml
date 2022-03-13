@@ -102,12 +102,6 @@ binary_sensor:
       - timing:
         - ON for at most 1s
         then:
-          - light.turn_on:
-              id: button1_led
-              brightness: 20%
-              red: 0%
-              green: 100%
-              blue: 0%
           - homeassistant.service:
               service: switch.turn_on
               data:
@@ -115,12 +109,6 @@ binary_sensor:
       - timing:
         - ON for at least 2s
         then:
-          - light.turn_on:
-              id: button1_led
-              brightness: 20%
-              red: 100%
-              green: 0%
-              blue: 0%
           - homeassistant.service:
               service: switch.turn_off
               data:
@@ -133,34 +121,10 @@ binary_sensor:
         pulldown: true
     name: "${friendly_name} Button 2"
     internal: true
-    on_multi_click:
-      - timing:
-        - ON for at most 1s
-        - OFF for at least 0.3s
+    on_click:
         then:
-          - light.turn_on:
-              id: button2_led
-              brightness: 20%
-              red: 0%
-              green: 100%
-              blue: 0%
-              transition_length: 1s
           - homeassistant.service:
-              service: light.turn_on
-              data:
-                area_id: office
-      - timing:
-        - ON for at least 2s
-        then:
-          - light.turn_on:
-              id: button2_led
-              brightness: 20%
-              red: 100%
-              green: 0%
-              blue: 0%
-              transition_length: 1s
-          - homeassistant.service:
-              service: light.turn_off
+              service: light.toggle
               data:
                 area_id: office
   - platform: gpio
@@ -175,13 +139,6 @@ binary_sensor:
       - timing:
         - ON for at least 2s
         then:
-          - light.turn_on:
-              id: button3_led
-              brightness: 20%
-              red: 100%
-              green: 0%
-              blue: 0%
-              transition_length: 1s
           - homeassistant.service:
               service: button.press
               data:
@@ -190,13 +147,6 @@ binary_sensor:
         - ON for at most 1s
         - OFF for at least 0.3s
         then:
-          - light.turn_on:
-              id: button3_led
-              brightness: 20%
-              red: 86%
-              green: 100%
-              blue: 0%
-              transition_length: 1s
           - homeassistant.service:
               service: button.press
               data:
@@ -207,13 +157,6 @@ binary_sensor:
         - ON for at most 1s
         - OFF for at least 0.3s
         then:
-          - light.turn_on:
-              id: button3_led
-              brightness: 20%
-              red: 0%
-              green: 100%
-              blue: 0%
-              transition_length: 1s
           - homeassistant.service:
               service: button.press
               data:
@@ -225,13 +168,6 @@ binary_sensor:
         - OFF for at most 0.2s
         - ON for at most 1s
         then:
-          - light.turn_on:
-              id: button3_led
-              brightness: 20%
-              red: 0%
-              green: 0%
-              blue: 100%
-              transition_length: 1s
           - homeassistant.service:
               service: button.press
               data:
@@ -261,7 +197,7 @@ binary_sensor:
           - homeassistant.service:
               service: button.press
               data:
-                entity_id: button.office_desk_height_stop
+                entity_id: button.office_desk_stop
       - timing:
         - ON for at most 1s
         - OFF for at least 0.3s
@@ -269,7 +205,7 @@ binary_sensor:
           - homeassistant.service:
               service: number.set_value
               data:
-                entity_id: number.office_desk_height_control
+                entity_id: number.office_desk_target_height
                 value: "700"
       - timing:
         - ON for at most 1s
@@ -280,5 +216,5 @@ binary_sensor:
           - homeassistant.service:
               service: number.set_value
               data:
-                entity_id: number.office_desk_height_control
+                entity_id: number.office_desk_target_height
                 value: "1150"
