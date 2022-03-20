@@ -21,6 +21,13 @@ prometheus:
 recorder:
     auto_purge: true
     purge_keep_days: 7
+    exclude:
+        entity_globs:
+            - sensor.*_wifi_signal
+        entities:
+            - sensor.thotmobile_energy_added_sensor
+            - device_tracker.thotmobile_location_tracker
+            - sensor.cpu_temperature
 
 sensor:
   - platform: command_line
