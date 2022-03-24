@@ -1,6 +1,6 @@
 substitutions:
-  friendly_name: "Nixie clock dori"
-  device_name: "nixie-clock-dori"
+  friendly_name: "Office nixie clock"
+  device_name: "clock-nixie-office"
 
 packages:
   custom: !include base-custom.yaml
