@@ -45,6 +45,7 @@ api:
         text: string
         dots: string
         color: int[]
+        animations: bool
       then:
         - lambda: |-
             if (color.size() != 3) {
