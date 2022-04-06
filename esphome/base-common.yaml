@@ -37,12 +37,15 @@ captive_portal:
 button:
   - platform: safe_mode
     name: "${friendly_name} ${type_prefix} Restart in Safe Mode"
+    internal: true
 
 binary_sensor:
   - platform: status
     name: "${friendly_name} ${type_prefix} Status"
+    internal: true
 
 sensor:
   - platform: wifi_signal
     name: "${friendly_name} ${type_prefix} WiFi Signal"
     update_interval: 60s
+    internal: true
