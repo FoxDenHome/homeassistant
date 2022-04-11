@@ -10,7 +10,7 @@ esp8266:
 
 esphome:
   includes:
-    - components/uplift-uart.h
+    - components/uplift/uart.h
 
 uart:
   - rx_pin:
