@@ -3,4 +3,4 @@ substitutions:
   type_prefix_host: "custom"
 
 packages:
-  common: !include base-common.yaml
+  common: !include common.yaml

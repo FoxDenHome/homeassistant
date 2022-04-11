@@ -1,0 +1,7 @@
+substitutions:
+  friendly_name: "Wizzy Desk"
+  device_name: "wizzy-desk"
+
+packages:
+  custom: !include base-uplift.yaml
+

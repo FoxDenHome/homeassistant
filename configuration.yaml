@@ -16,6 +16,11 @@ http:
   trusted_proxies:
     - 172.30.33.0/24
 
+discovery:
+  ignore:
+    - dlna_dmr
+    - apple_tv
+
 prometheus:
 
 recorder:

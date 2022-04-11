@@ -1,0 +1,10 @@
+substitutions:
+  friendly_name: "Dori Desk"
+  device_name: "dori-desk"
+
+wifi:
+  use_address: 10.2.141.224
+
+packages:
+  custom: !include base/uplift.yaml
+

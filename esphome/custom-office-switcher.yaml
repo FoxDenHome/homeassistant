@@ -3,7 +3,7 @@ substitutions:
   device_name: "office-switcher"
 
 packages:
-  custom: !include base-custom.yaml
+  custom: !include base/custom.yaml
 
 esp32:
   board: nodemcu-32s
