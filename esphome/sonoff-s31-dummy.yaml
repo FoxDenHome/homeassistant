@@ -1,6 +1,0 @@
-substitutions:
-  friendly_name: "Dummy Device"
-  device_name: "dummy"
-
-packages:
-  sonoff-s31: !include base/sonoff-s31.yaml
