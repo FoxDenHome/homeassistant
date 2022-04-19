@@ -37,6 +37,22 @@ time:
             }
             id(uart_main).write_str(str);
 
+sensor:
+  - platform: homeassistant
+    id: current_temperature
+    entity_id: sensor.office_temperature
+    on_value:
+      then:
+        - lambda: |-
+            char str[32];
+            const float temp = id(current_temperature).state * 1000.0;
+            const  int tempL = (unsigned long)temp;
+            int len = snprintf(str, sizeof(str), "^S%08d\n", tempL);
+            if (len < 0 || len >= sizeof(str)) {
+              return;
+            }
+            id(uart_main).write_str(str);
+
 api:
   services:
     - service: notify
