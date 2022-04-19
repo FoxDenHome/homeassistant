@@ -3,5 +3,5 @@ substitutions:
   device_name: "wizzy-desk"
 
 packages:
-  custom: !include base-uplift.yaml
+  custom: !include base/uplift.yaml
 
