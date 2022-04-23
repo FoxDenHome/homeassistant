@@ -39,15 +39,15 @@ time:
 
 sensor:
   - platform: homeassistant
-    id: current_temperature
-    entity_id: sensor.office_temperature
+    attribute: temperature
+    entity_id: weather.foxden_home
+    internal: true
+    id: clock_temperature
     on_value:
       then:
         - lambda: |-
-            char str[32];
-            const float temp = id(current_temperature).state * 1000.0;
-            const  int tempL = (unsigned long)temp;
-            int len = snprintf(str, sizeof(str), "^S%08d\n", tempL);
+            char str[64];
+            int len = snprintf(str, sizeof(str), "^S%.4f\n", x);
             if (len < 0 || len >= sizeof(str)) {
               return;
             }
