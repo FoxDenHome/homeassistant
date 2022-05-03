@@ -61,11 +61,29 @@ sensor:
       id: senseair_co2_value
     update_interval: 60s
 
-api:
-  services:
-    - service: calibrate_co2
-      then:
-        - senseair.background_calibration: senseair_co2_sensor
-    - service: disable_co2_abc
-      then:
-        - senseair.abc_disable: senseair_co2_sensor
+button:
+  - platform: template
+    name: "${friendly_name} ${type_prefix} Enable ABC"
+    internal: true
+    on_press:
+      - senseair.abc_enable: senseair_co2_sensor
+  - platform: template
+    name: "${friendly_name} ${type_prefix} Disable ABC"
+    internal: true
+    on_press:
+      - senseair.abc_disable: senseair_co2_sensor
+  - platform: template
+    name: "${friendly_name} ${type_prefix} Query ABC Period"
+    internal: true
+    on_press:
+      - senseair.abc_get_period: senseair_co2_sensor
+  - platform: template
+    name: "${friendly_name} ${type_prefix} Force BC"
+    internal: true
+    on_press:
+      - senseair.background_calibration: senseair_co2_sensor
+  - platform: template
+    name: "${friendly_name} ${type_prefix} Query BC Result"
+    internal: true
+    on_press:
+      - senseair.background_calibration_result: senseair_co2_sensor
