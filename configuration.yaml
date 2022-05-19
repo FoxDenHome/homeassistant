@@ -1,47 +1,14 @@
 # Configure a default setup of Home Assistant (frontend, api, etc)
-#default_config:
+default_config:
 
-# Individual options represented by default_config
 automation: !include automations.yaml
-#backup:
-#cloud:
-config:
-counter:
-#dhcp:
-energy:
-frontend:
-history:
-image:
-input_boolean:
-input_button:
-input_datetime:
-input_number:
-input_select:
-input_text:
-logbook:
-map:
-#media_source:
-mobile_app:
-my:
-person:
 scene: !include scenes.yaml
 script: !include scripts.yaml
-#ssdp:
-stream:
-sun:
-system_health:
-tag:
-timer:
-usb:
-webhook:
-#zeroconf:
-zone:
+group: !include groups.yaml
 
 # Text to speech
 tts:
   - platform: google_translate
-
-group: !include groups.yaml
 
 http:
   use_x_forwarded_for: true

@@ -35,24 +35,13 @@ sensor:
   - platform: pmsx003
     type: PMSX003
     uart_id: uart_pms5003
+    update_interval: 60s
     pm_1_0:
       name: "${friendly_name} Particulate Matter <1.0µm Concentration"
-      filters:
-        - median:
-            window_size: 60
-            send_every: 60
     pm_2_5:
       name: "${friendly_name} Particulate Matter <2.5µm Concentration"
-      filters:
-        - median:
-            window_size: 60
-            send_every: 60
     pm_10_0:
       name: "${friendly_name} Particulate Matter <10.0µm Concentration"
-      filters:
-        - median:
-            window_size: 60
-            send_every: 60
   - platform: senseair
     id: senseair_co2_sensor
     uart_id: uart_senseair
