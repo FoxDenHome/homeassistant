@@ -140,17 +140,18 @@ binary_sensor:
         - ON for at least 2s
         then:
           - homeassistant.service:
-              service: button.press
+              service: fan.turn_off
               data:
-                entity_id: button.office_ceiling_fan_off
+                entity_id: fan.office_ceiling_fan
       - timing:
         - ON for at most 1s
         - OFF for at least 0.3s
         then:
           - homeassistant.service:
-              service: button.press
+              service: fan.set_percentage
               data:
-                entity_id: button.office_ceiling_fan_low_speed
+                entity_id: fan.office_ceiling_fan
+                percentage: "33"
       - timing:
         - ON for at most 1s
         - OFF for at most 0.2s
@@ -158,9 +159,10 @@ binary_sensor:
         - OFF for at least 0.3s
         then:
           - homeassistant.service:
-              service: button.press
+              service: fan.set_percentage
               data:
-                entity_id: button.office_ceiling_fan_medium_speed
+                entity_id: fan.office_ceiling_fan
+                percentage: "66"
       - timing:
         - ON for at most 1s
         - OFF for at most 0.2s
@@ -169,9 +171,10 @@ binary_sensor:
         - ON for at most 1s
         then:
           - homeassistant.service:
-              service: button.press
+              service: fan.set_percentage
               data:
-                entity_id: button.office_ceiling_fan_high_speed
+                entity_id: fan.office_ceiling_fan
+                percentage: "100"
       - timing:
         - ON for at most 1s
         - OFF for at most 0.2s
