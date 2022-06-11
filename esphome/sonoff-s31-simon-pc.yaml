@@ -4,3 +4,4 @@ substitutions:
 
 packages:
   sonoff-s31-defon: !include base/sonoff-s31-defon.yaml
+  debug: !include base/debug.yaml

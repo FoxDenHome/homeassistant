@@ -21,6 +21,14 @@ uart:
         pulldown: false
     baud_rate: 9600
     id: uart_desk
+  - rx_pin:
+      number: D7
+      mode:
+        input: true
+        pullup: false
+        pulldown: false
+    baud_rate: 9600
+    id: uart_controller
 
 output:
   - platform: gpio
@@ -51,14 +59,6 @@ output:
     id: button_m
     pin:
       number: D6
-      inverted: true
-      mode:
-        output: true
-        open_drain: true
-  - platform: gpio
-    id: io_unused
-    pin:
-      number: D7
       inverted: true
       mode:
         output: true
