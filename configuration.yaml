@@ -41,10 +41,6 @@ sensor:
     unit_of_measurement: "°C"
     value_template: "{{ value | multiply(0.001) }}"
 
-neato:
-  client_id: !secret neato_client_id
-  client_secret: !secret neato_client_secret
-
 input_boolean:
   bedroom_ceiling_fan_state:
   office_ceiling_fan_state:

@@ -1,0 +1,43 @@
+substitutions:
+  type_prefix: "Sonoff S31"
+  type_prefix_host: "sonoff-s31"
+
+packages:
+  common: !include common.yaml
+
+esp8266:
+  board: esp01_1m
+
+uart:
+  rx_pin: RX
+  baud_rate: 4800
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO0
+      mode:
+        input: true
+        pullup: true
+      inverted: True
+    name: "${friendly_name} ${type_prefix} Button"
+    internal: true
+    on_press:
+      - switch.toggle: relay
+
+sensor:
+  - platform: cse7766
+    current:
+      name: "${friendly_name} Current"
+      accuracy_decimals: 1
+    voltage:
+      name: "${friendly_name} Voltage"
+      accuracy_decimals: 1
+    power:
+      name: "${friendly_name} Power"
+      accuracy_decimals: 1
+
+status_led:
+  pin:
+    number: GPIO13
+    inverted: true
