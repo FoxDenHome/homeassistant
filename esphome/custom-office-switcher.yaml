@@ -220,4 +220,4 @@ binary_sensor:
               service: number.set_value
               data:
                 entity_id: number.office_desk_target_height
-                value: "1150"
+                value: "1000"
