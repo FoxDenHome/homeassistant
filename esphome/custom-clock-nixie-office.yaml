@@ -80,7 +80,7 @@ api:
             }
 
             char str[64];
-            int len = snprintf(str, sizeof(str), "^F%08d000         %02x%02x%02x\n", duration, color[0], color[1], color[2]);
+            int len = snprintf(str, sizeof(str), "^F%08d            %02x%02x%02x\n", duration, color[0], color[1], color[2]);
             if (len < 0 || len >= sizeof(str)) {
               return;
             }
