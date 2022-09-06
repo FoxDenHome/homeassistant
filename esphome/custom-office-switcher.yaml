@@ -209,7 +209,7 @@ binary_sensor:
               service: number.set_value
               data:
                 entity_id: number.office_desk_target_height
-                value: "720"
+                value: "700"
       - timing:
         - ON for at most 1s
         - OFF for at most 0.2s
