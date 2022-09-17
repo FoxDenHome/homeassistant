@@ -86,6 +86,32 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
+class LabelledTimestampedMetric(object):
+    def __init__(self, metric, label_values, add_timestamps):
+        self._metric = metric
+        self._label_values = label_values
+        self._timestamp = None
+        self._value = None
+        self._add_timestamps = add_timestamps
+
+    def set_with_state(self, value, state):
+        self.set(value, timestamp=state.last_updated.timestamp())
+
+    def set(self, value, timestamp=None):
+        self._value = value
+        if self._add_timestamps:
+            self._timestamp = timestamp
+
+    def inc(self):
+        if self._value is None:
+            self._value = 0
+        self._value += 1
+
+    def collect(self, m):
+        if self._value is None:
+            return
+        m.add_metric(self._label_values, self._value, timestamp=self._timestamp)
+
 class TimestampedMetric(object):
     """Customized implementation of a prometheus metric to allow for timestamps"""
 
@@ -98,37 +124,31 @@ class TimestampedMetric(object):
         self._label_dict = {}
         for i, label in enumerate(labels):
             self._label_dict[label] = i
-        self._label_values = [None] * len(labels)
 
-        self._value = None
+        self._values = {}
         self._add_timestamps = add_timestamps
         self._timestamp = None
 
         registry.register(self)
 
     def labels(self, **kwargs):
+        label_values = [""] * len(self._labels)
         for label, value in kwargs.items():
-            self._label_values[self._label_dict[label]] = value
-        return self
+            label_values[self._label_dict[label]] = value
 
-    def set_with_state(self, value, state):
-        self.set(value, timestamp=state.last_updated.timestamp())
+        label_hash = ("\n".join(label_values)).__hash__()
 
-    def set(self, value, timestamp=None):
-        self._value = value
-        if self._add_timestamps:
-            self._timestamp = timestamp
-        return self
+        labelled_metric = self._values.get(label_hash)
+        if labelled_metric is None:
+            labelled_metric = LabelledTimestampedMetric(self, label_values, self._add_timestamps)
+            self._values[label_hash] = labelled_metric
 
-    def inc(self):
-        if self._value is None:
-            self._value = 0
-        self._value += 1
+        return labelled_metric
 
     def collect(self):
         m = self._metric_family(self.name, self.help_text, labels=self._labels)
-        if self._value is not None:
-            m.add_metric(self._label_values, self._value, timestamp=self._timestamp)
+        for value in self._values.values():
+            value.collect(m)
         return [m]
 
 def setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -146,7 +166,7 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
         conf[CONF_COMPONENT_CONFIG_DOMAIN],
         conf[CONF_COMPONENT_CONFIG_GLOB],
     )
-    add_timestamps = config.get(CONF_ADD_TIMESTAMPS)
+    add_timestamps = conf.get(CONF_ADD_TIMESTAMPS)
 
     metrics = PrometheusMetrics(
         prometheus_client,
