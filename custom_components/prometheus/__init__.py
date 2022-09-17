@@ -5,7 +5,6 @@ import string
 
 from aiohttp import web
 import prometheus_client
-from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily
 import voluptuous as vol
 
 from homeassistant import core as hacore
@@ -50,7 +49,6 @@ API_ENDPOINT = "/api/prometheus"
 DOMAIN = "prometheus"
 CONF_FILTER = "filter"
 CONF_PROM_NAMESPACE = "namespace"
-CONF_ADD_TIMESTAMPS = "add_timestamps"
 CONF_COMPONENT_CONFIG = "component_config"
 CONF_COMPONENT_CONFIG_GLOB = "component_config_glob"
 CONF_COMPONENT_CONFIG_DOMAIN = "component_config_domain"
@@ -79,77 +77,12 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Optional(CONF_COMPONENT_CONFIG_DOMAIN, default={}): vol.Schema(
                     {cv.string: COMPONENT_CONFIG_SCHEMA_ENTRY}
                 ),
-                vol.Optional(CONF_ADD_TIMESTAMPS, default=False): cv.boolean,
             }
         )
     },
     extra=vol.ALLOW_EXTRA,
 )
 
-class LabelledTimestampedMetric(object):
-    def __init__(self, metric, label_values, add_timestamps):
-        self._metric = metric
-        self._label_values = label_values
-        self._timestamp = None
-        self._value = None
-        self._add_timestamps = add_timestamps
-
-    def set_with_state(self, value, state):
-        self.set(value, timestamp=state.last_updated.timestamp())
-
-    def set(self, value, timestamp=None):
-        self._value = value
-        if self._add_timestamps:
-            self._timestamp = timestamp
-
-    def inc(self):
-        if self._value is None:
-            self._value = 0
-        self._value += 1
-
-    def collect(self, m):
-        if self._value is None:
-            return
-        m.add_metric(self._label_values, self._value, timestamp=self._timestamp)
-
-class TimestampedMetric(object):
-    """Customized implementation of a prometheus metric to allow for timestamps"""
-
-    def __init__(self, metric_family, name, help_text, labels, add_timestamps, registry):
-        self.name = name
-        self.help_text = help_text
-        self._metric_family = metric_family
-
-        self._labels = labels
-        self._label_dict = {}
-        for i, label in enumerate(labels):
-            self._label_dict[label] = i
-
-        self._values = {}
-        self._add_timestamps = add_timestamps
-        self._timestamp = None
-
-        registry.register(self)
-
-    def labels(self, **kwargs):
-        label_values = [""] * len(self._labels)
-        for label, value in kwargs.items():
-            label_values[self._label_dict[label]] = value
-
-        label_hash = ("\n".join(label_values)).__hash__()
-
-        labelled_metric = self._values.get(label_hash)
-        if labelled_metric is None:
-            labelled_metric = LabelledTimestampedMetric(self, label_values, self._add_timestamps)
-            self._values[label_hash] = labelled_metric
-
-        return labelled_metric
-
-    def collect(self):
-        m = self._metric_family(self.name, self.help_text, labels=self._labels)
-        for value in self._values.values():
-            value.collect(m)
-        return [m]
 
 def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Activate Prometheus component."""
@@ -166,7 +99,6 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
         conf[CONF_COMPONENT_CONFIG_DOMAIN],
         conf[CONF_COMPONENT_CONFIG_GLOB],
     )
-    add_timestamps = conf.get(CONF_ADD_TIMESTAMPS)
 
     metrics = PrometheusMetrics(
         prometheus_client,
@@ -176,7 +108,6 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
         component_config,
         override_metric,
         default_metric,
-        add_timestamps,
     )
 
     hass.bus.listen(EVENT_STATE_CHANGED, metrics.handle_state_changed)
@@ -198,7 +129,6 @@ class PrometheusMetrics:
         component_config,
         override_metric,
         default_metric,
-        add_timestamps,
     ):
         """Initialize Prometheus Metrics."""
         self.prometheus_cli = prometheus_cli
@@ -213,7 +143,6 @@ class PrometheusMetrics:
             self._sensor_default_metric,
             self._sensor_fallback_metric,
         ]
-        self._add_timestamps = add_timestamps
 
         if namespace:
             self.metrics_prefix = f"{namespace}_"
@@ -221,6 +150,7 @@ class PrometheusMetrics:
             self.metrics_prefix = ""
         self._metrics = {}
         self._climate_units = climate_units
+        self._tracked_entity_ids = set()
 
     def handle_state_changed(self, event):
         """Listen for new messages on the bus, and add them to Prometheus."""
@@ -239,32 +169,23 @@ class PrometheusMetrics:
         ) != state.attributes.get(ATTR_FRIENDLY_NAME):
             self._remove_labelsets(old_state.entity_id, old_friendly_name)
 
-        ignored_states = (STATE_UNAVAILABLE, STATE_UNKNOWN)
+        if state.state in (STATE_UNAVAILABLE, STATE_UNKNOWN):
+            self._remove_labelsets(state.entity_id)
+            return
+
+        self._tracked_entity_ids.add(state.entity_id)
 
         handler = f"_handle_{domain}"
 
-        if hasattr(self, handler) and state.state not in ignored_states:
+        if hasattr(self, handler):
             getattr(self, handler)(state)
-
-        labels = self._labels(state)
-        state_change = self._metric(
-            "state_change", CounterMetricFamily, "The number of state changes"
-        )
-        state_change.labels(**labels).inc()
-
-        entity_available = self._metric(
-            "entity_available",
-            GaugeMetricFamily,
-            "Entity is available (not in the unavailable or unknown state)",
-        )
-        entity_available.labels(**labels).set_with_state(float(state.state not in ignored_states), state)
 
         last_updated_time_seconds = self._metric(
             "last_updated_time_seconds",
-            GaugeMetricFamily,
+            self.prometheus_cli.Gauge,
             "The last_updated timestamp",
         )
-        last_updated_time_seconds.labels(**labels).set_with_state(state.last_updated.timestamp(), state)
+        last_updated_time_seconds.labels(**labels).set(state.last_updated.timestamp())
 
     def handle_entity_registry_updated(self, event):
         """Listen for deleted, disabled or renamed entities and remove them from the Prometheus Registry."""
@@ -290,6 +211,11 @@ class PrometheusMetrics:
             self._remove_labelsets(metrics_entity_id)
 
     def _remove_labelsets(self, entity_id, friendly_name=None):
+        if friendly_name is None:
+            if entity_id not in self._tracked_entity_ids:
+                return
+            self._tracked_entity_ids.remove(entity_id)
+
         """Remove labelsets matching the given entity id from all metrics."""
         for _, metric in self._metrics.items():
             for sample in metric.collect()[0].samples:
@@ -310,17 +236,17 @@ class PrometheusMetrics:
         for key, value in state.attributes.items():
             metric = self._metric(
                 f"{state.domain}_attr_{key.lower()}",
-                GaugeMetricFamily,
+                self.prometheus_cli.Gauge,
                 f"{key} attribute of {state.domain} entity",
             )
 
             try:
                 value = float(value)
-                metric.labels(**self._labels(state)).set_with_state(value, state)
+                metric.labels(**self._labels(state)).set(value)
             except (ValueError, TypeError):
                 pass
 
-    def _metric(self, metric, metric_family, documentation, extra_labels=None):
+    def _metric(self, metric, factory, documentation, extra_labels=None):
         labels = ["entity", "friendly_name", "domain"]
         if extra_labels is not None:
             labels.extend(extra_labels)
@@ -331,14 +257,11 @@ class PrometheusMetrics:
             full_metric_name = self._sanitize_metric_name(
                 f"{self.metrics_prefix}{metric}"
             )
-
-            self._metrics[metric] = TimestampedMetric(
-                metric_family,
+            self._metrics[metric] = factory(
                 full_metric_name,
                 documentation,
                 labels,
                 registry=self.prometheus_cli.REGISTRY,
-                add_timestamps=self._add_timestamps,
             )
             return self._metrics[metric]
 
@@ -378,44 +301,44 @@ class PrometheusMetrics:
         if "battery_level" in state.attributes:
             metric = self._metric(
                 "battery_level_percent",
-                GaugeMetricFamily,
+                self.prometheus_cli.Gauge,
                 "Battery level as a percentage of its capacity",
             )
             try:
                 value = float(state.attributes[ATTR_BATTERY_LEVEL])
-                metric.labels(**self._labels(state)).set_with_state(value, state)
+                metric.labels(**self._labels(state)).set(value)
             except ValueError:
                 pass
 
     def _handle_binary_sensor(self, state):
         metric = self._metric(
             "binary_sensor_state",
-            GaugeMetricFamily,
+            self.prometheus_cli.Gauge,
             "State of the binary sensor (0/1)",
         )
         value = self.state_as_number(state)
-        metric.labels(**self._labels(state)).set_with_state(value, state)
+        metric.labels(**self._labels(state)).set(value)
 
     def _handle_input_boolean(self, state):
         metric = self._metric(
             "input_boolean_state",
-            GaugeMetricFamily,
+            self.prometheus_cli.Gauge,
             "State of the input boolean (0/1)",
         )
         value = self.state_as_number(state)
-        metric.labels(**self._labels(state)).set_with_state(value, state)
+        metric.labels(**self._labels(state)).set(value)
 
     def _handle_input_number(self, state):
         if unit := self._unit_string(state.attributes.get(ATTR_UNIT_OF_MEASUREMENT)):
             metric = self._metric(
                 f"input_number_state_{unit}",
-                GaugeMetricFamily,
+                self.prometheus_cli.Gauge,
                 f"State of the input number measured in {unit}",
             )
         else:
             metric = self._metric(
                 "input_number_state",
-                GaugeMetricFamily,
+                self.prometheus_cli.Gauge,
                 "State of the input number",
             )
 
@@ -423,28 +346,28 @@ class PrometheusMetrics:
             value = self.state_as_number(state)
             if state.attributes.get(ATTR_UNIT_OF_MEASUREMENT) == TEMP_FAHRENHEIT:
                 value = fahrenheit_to_celsius(value)
-            metric.labels(**self._labels(state)).set_with_state(value, state)
+            metric.labels(**self._labels(state)).set(value)
 
     def _handle_device_tracker(self, state):
         metric = self._metric(
             "device_tracker_state",
-            GaugeMetricFamily,
+            self.prometheus_cli.Gauge,
             "State of the device tracker (0/1)",
         )
         value = self.state_as_number(state)
-        metric.labels(**self._labels(state)).set_with_state(value, state)
+        metric.labels(**self._labels(state)).set(value)
 
     def _handle_person(self, state):
         metric = self._metric(
-            "person_state", GaugeMetricFamily, "State of the person (0/1)"
+            "person_state", self.prometheus_cli.Gauge, "State of the person (0/1)"
         )
         value = self.state_as_number(state)
-        metric.labels(**self._labels(state)).set_with_state(value, state)
+        metric.labels(**self._labels(state)).set(value)
 
     def _handle_light(self, state):
         metric = self._metric(
             "light_brightness_percent",
-            GaugeMetricFamily,
+            self.prometheus_cli.Gauge,
             "Light brightness percentage (0..100)",
         )
 
@@ -454,16 +377,16 @@ class PrometheusMetrics:
             else:
                 value = self.state_as_number(state)
             value = value * 100
-            metric.labels(**self._labels(state)).set_with_state(value, state)
+            metric.labels(**self._labels(state)).set(value)
         except ValueError:
             pass
 
     def _handle_lock(self, state):
         metric = self._metric(
-            "lock_state", GaugeMetricFamily, "State of the lock (0/1)"
+            "lock_state", self.prometheus_cli.Gauge, "State of the lock (0/1)"
         )
         value = self.state_as_number(state)
-        metric.labels(**self._labels(state)).set_with_state(value, state)
+        metric.labels(**self._labels(state)).set(value)
 
     def _handle_climate_temp(self, state, attr, metric_name, metric_description):
         if temp := state.attributes.get(attr):
@@ -471,10 +394,10 @@ class PrometheusMetrics:
                 temp = fahrenheit_to_celsius(temp)
             metric = self._metric(
                 metric_name,
-                GaugeMetricFamily,
+                self.prometheus_cli.Gauge,
                 metric_description,
             )
-            metric.labels(**self._labels(state)).set_with_state(temp, state)
+            metric.labels(**self._labels(state)).set(temp)
 
     def _handle_climate(self, state):
         self._handle_climate_temp(
@@ -505,14 +428,13 @@ class PrometheusMetrics:
         if current_action := state.attributes.get(ATTR_HVAC_ACTION):
             metric = self._metric(
                 "climate_action",
-                GaugeMetricFamily,
+                self.prometheus_cli.Gauge,
                 "HVAC action",
                 ["action"],
             )
             for action in HVACAction:
-                metric.labels(**dict(self._labels(state), action=action.value)).set_with_state(
-                    float(action == current_action),
-                    state,
+                metric.labels(**dict(self._labels(state), action=action.value)).set(
+                    float(action == current_action)
                 )
 
         current_mode = state.state
@@ -520,14 +442,13 @@ class PrometheusMetrics:
         if current_mode and available_modes:
             metric = self._metric(
                 "climate_mode",
-                GaugeMetricFamily,
+                self.prometheus_cli.Gauge,
                 "HVAC mode",
                 ["mode"],
             )
             for mode in available_modes:
-                metric.labels(**dict(self._labels(state), mode=mode)).set_with_state(
-                    float(mode == current_mode),
-                    state,
+                metric.labels(**dict(self._labels(state), mode=mode)).set(
+                    float(mode == current_mode)
                 )
 
     def _handle_humidifier(self, state):
@@ -535,19 +456,19 @@ class PrometheusMetrics:
         if humidifier_target_humidity_percent:
             metric = self._metric(
                 "humidifier_target_humidity_percent",
-                GaugeMetricFamily,
+                self.prometheus_cli.Gauge,
                 "Target Relative Humidity",
             )
-            metric.labels(**self._labels(state)).set_with_state(humidifier_target_humidity_percent, state)
+            metric.labels(**self._labels(state)).set(humidifier_target_humidity_percent)
 
         metric = self._metric(
             "humidifier_state",
-            GaugeMetricFamily,
+            self.prometheus_cli.Gauge,
             "State of the humidifier (0/1)",
         )
         try:
             value = self.state_as_number(state)
-            metric.labels(**self._labels(state)).set_with_state(value, state)
+            metric.labels(**self._labels(state)).set(value)
         except ValueError:
             pass
 
@@ -556,14 +477,13 @@ class PrometheusMetrics:
         if current_mode and available_modes:
             metric = self._metric(
                 "humidifier_mode",
-                GaugeMetricFamily,
+                self.prometheus_cli.Gauge,
                 "Humidifier Mode",
                 ["mode"],
             )
             for mode in available_modes:
-                metric.labels(**dict(self._labels(state), mode=mode)).set_with_state(
-                    float(mode == current_mode),
-                    state,
+                metric.labels(**dict(self._labels(state), mode=mode)).set(
+                    float(mode == current_mode)
                 )
 
     def _handle_sensor(self, state):
@@ -579,13 +499,13 @@ class PrometheusMetrics:
             if unit:
                 documentation = f"Sensor data measured in {unit}"
 
-            _metric = self._metric(metric, GaugeMetricFamily, documentation)
+            _metric = self._metric(metric, self.prometheus_cli.Gauge, documentation)
 
             try:
                 value = self.state_as_number(state)
                 if state.attributes.get(ATTR_UNIT_OF_MEASUREMENT) == TEMP_FAHRENHEIT:
                     value = fahrenheit_to_celsius(value)
-                _metric.labels(**self._labels(state)).set_with_state(value, state)
+                _metric.labels(**self._labels(state)).set(value)
             except ValueError:
                 pass
 
@@ -642,12 +562,12 @@ class PrometheusMetrics:
 
     def _handle_switch(self, state):
         metric = self._metric(
-            "switch_state", GaugeMetricFamily, "State of the switch (0/1)"
+            "switch_state", self.prometheus_cli.Gauge, "State of the switch (0/1)"
         )
 
         try:
             value = self.state_as_number(state)
-            metric.labels(**self._labels(state)).set_with_state(value, state)
+            metric.labels(**self._labels(state)).set(value)
         except ValueError:
             pass
 
@@ -659,7 +579,7 @@ class PrometheusMetrics:
     def _handle_automation(self, state):
         metric = self._metric(
             "automation_triggered_count",
-            CounterMetricFamily,
+            self.prometheus_cli.Counter,
             "Count of times an automation has been triggered",
         )
 
@@ -668,11 +588,11 @@ class PrometheusMetrics:
     def _handle_counter(self, state):
         metric = self._metric(
             "counter_value",
-            GaugeMetricFamily,
+            self.prometheus_cli.Gauge,
             "Value of counter entities",
         )
 
-        metric.labels(**self._labels(state)).set_with_state(self.state_as_number(state), state)
+        metric.labels(**self._labels(state)).set(self.state_as_number(state))
 
 
 class PrometheusView(HomeAssistantView):
