@@ -21,7 +21,6 @@ discovery:
     - apple_tv
 
 prometheus:
-  add_timestamps: true
 
 recorder:
   auto_purge: true
