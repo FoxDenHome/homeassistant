@@ -185,7 +185,7 @@ class PrometheusMetrics:
             self.prometheus_cli.Gauge,
             "The last_updated timestamp",
         )
-        last_updated_time_seconds.labels(**labels).set(state.last_updated.timestamp())
+        last_updated_time_seconds.labels(**self._labels(state)).set(state.last_updated.timestamp())
 
     def handle_entity_registry_updated(self, event):
         """Listen for deleted, disabled or renamed entities and remove them from the Prometheus Registry."""
