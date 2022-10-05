@@ -1,6 +1,6 @@
 substitutions:
-  friendly_name: "Office"
-  device_name: "office"
+  friendly_name: "Dori Office"
+  device_name: "dori-office"
 
 packages:
   airgradient: !include base/airgradient.yaml
