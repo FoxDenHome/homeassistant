@@ -1,0 +1,10 @@
+packages:
+  sonoff-s31-super: !include sonoff-s31-super.yaml
+
+switch:
+  - platform: gpio
+    name: "${friendly_name} Relay"
+    pin: GPIO12
+    id: relay
+    restore_mode: ALWAYS_ON
+    internal: true

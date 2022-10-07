@@ -1,0 +1,6 @@
+substitutions:
+  friendly_name: "Microwave"
+  device_name: "microwave"
+
+packages:
+  sonoff-s31-alwayson: !include base/sonoff-s31-alwayson.yaml
