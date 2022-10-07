@@ -37,19 +37,25 @@ sensor:
     uart_id: uart_pms5003
     pm_1_0:
       name: "${friendly_name} Particulate Matter <1.0µm Concentration"
+      device_class: pm1
       filters:
+        - offset: 1
         - median:
             window_size: 60
             send_every: 60
     pm_2_5:
       name: "${friendly_name} Particulate Matter <2.5µm Concentration"
+      device_class: pm25
       filters:
+        - offset: 1
         - median:
             window_size: 60
             send_every: 60
     pm_10_0:
       name: "${friendly_name} Particulate Matter <10.0µm Concentration"
+      device_class: pm10
       filters:
+        - offset: 1
         - median:
             window_size: 60
             send_every: 60
