@@ -2,6 +2,8 @@
 /.storage
 /custom_components
 /node-red
+/www/community
+/themes/metro
 
 /secrets.yaml
 

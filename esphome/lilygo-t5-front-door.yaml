@@ -1,0 +1,6 @@
+substitutions:
+    friendly_name: "Front door"
+    device_name: "front-door"
+
+packages:
+    lilygo-t5: !include base/lilygo-t5.yaml

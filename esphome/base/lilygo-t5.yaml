@@ -1,0 +1,88 @@
+substitutions:
+  type_prefix: "Lilygo T5"
+  type_prefix_host: "lilygo-t5"
+
+packages:
+  common: !include common.yaml
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+external_components:
+  - source: github://ashald/esphome@lilygo-t5-47
+    components:
+      - lilygo_t5_47
+
+spi:
+  clk_pin: 18
+  mosi_pin: 23
+
+i2c:
+  sda: 15
+  scl: 14
+  scan: True
+
+font:
+  - file: "fonts/SourceSansPro-Regular.ttf"
+    id: font_small
+    size: 28
+  - file: "fonts/SourceSansPro-Regular.ttf"
+    id: font_large
+    size: 56
+
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: font_icons
+    size: 160
+    glyphs:
+      - "\U000F0594" # clear-night
+      - "\U000F0590" # cloudy
+      - "\U000F0595" # partlycloudy
+      - "\U000F0591" # fog
+      - "\U000F0592" # hail
+      - "\U000F0593" # lightning
+      - "\U000F067E" # lightning-rainy
+      - "\U000F0596" # pouring
+      - "\U000F0597" # rainy
+      - "\U000F0F36" # snowy
+      - "\U000F067F" # snowy-rainy
+      - "\U000F0599" # sunny
+      - "\U000F059D" # windy
+      - "\U000F059E" # windy-variant
+      - "\U000F0F38" # exceptional
+
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: font_icons_small
+    size: 56
+    glyphs:
+      - "\U000F10C2" # Temperature High
+      - "\U000F10C3" # Temperature Low
+      - "\U000F07E4" # CO2
+      - "\U000F054B" # umbrella
+      - "\U000F0592" # hail
+      - "\U000F0593" # lightning
+      - "\U000F067E" # lightning-rainy
+      - "\U000F0597" # rainy
+      - "\U000F0F36" # snowy
+      - "\U000F0594" # clear-night
+      - "\U000F0599" # sunny
+      - "\U000F07CA" # fuel
+      - "\U000F024A" # flower
+      - "\U000F051F" # time-remaining
+      - "\U000F140B" # Energy
+
+time:
+  - platform: homeassistant
+
+display:
+  - platform: lilygo_t5_47
+    id: t5_display
+    update_interval: 30s
+    lambda: |-
+      #define xres 960
+      #define yres 540
+      #define x_pad 10 // border padding
+      #define y_pad 10 // border padding      
+
+      it.printf(xres-x_pad, yres-y_pad/2, id(font_footer), TextAlign::BASELINE_RIGHT, "Hello World");
