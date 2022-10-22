@@ -3,4 +3,4 @@ substitutions:
   device_name: "bedroom"
 
 packages:
-  airgradient: !include base/airgradient.yaml
+  airgradient: !include base/airgradient-esp8266.yaml
