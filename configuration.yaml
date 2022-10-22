@@ -36,3 +36,6 @@ recorder:
       - device_tracker.thotmobile_location_tracker
       - sensor.cpu_temperature
       - switch.adaptive_lighting_global
+
+shell_command:
+  r00t_dori_tv: /config/r00t-dori-tv.py
