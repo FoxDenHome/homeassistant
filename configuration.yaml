@@ -39,3 +39,24 @@ recorder:
 
 shell_command:
   r00t_dori_tv: /config/r00t-dori-tv.py
+
+switch:
+  - platform: template
+    switches:
+      vrsetup:
+        turn_on:
+          service: switch.turn_on
+          data:
+            entity_id:
+              - switch.lighthouse_br_relay
+              - switch.lighthouse_bl_relay
+              - switch.lighthouse_fl_relay
+              - switch.valve_index_relay
+        turn_off:
+          service: switch.turn_off
+          data:
+            entity_id:
+              - switch.lighthouse_br_relay
+              - switch.lighthouse_bl_relay
+              - switch.lighthouse_fl_relay
+              - switch.valve_index_relay
