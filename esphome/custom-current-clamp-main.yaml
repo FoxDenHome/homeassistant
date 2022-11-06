@@ -1,0 +1,73 @@
+substitutions:
+  friendly_name: "Main current clamp"
+  device_name: "current-clamp-main"
+
+packages:
+  custom: !include base/custom.yaml
+
+esp8266:
+  board: d1_mini
+
+i2c:
+  sda: D2
+  scl: D1
+  scan: true
+
+ads1115:
+  - address: 0x48
+    id: adc
+    continuous_mode: true
+
+# https://github.com/Mottramlabs/4-Channel-Mains-Current-Sensor/issues/2
+# filters:
+#   - calibrate_linear:
+#       # Measured value of 0 maps to 0A
+#       - 0 -> 0
+#       # Known load: 7.73A
+#       # Value shown in logs: 0.057A
+#       - 0.057 -> 7.73
+
+sensor:
+  - platform: ads1115
+    multiplexer: 'A0_GND'
+    gain: 2.048
+    internal: true
+    id: ads_1
+  
+  - platform: ads1115
+    multiplexer: 'A1_GND'
+    gain: 2.048
+    internal: true
+    id: ads_2
+  
+  - platform: ads1115
+    multiplexer: 'A2_GND'
+    gain: 2.048
+    internal: true
+    id: ads_3
+  
+  - platform: ads1115
+    multiplexer: 'A3_GND'
+    gain: 2.048
+    internal: true
+    id: ads_4
+
+  - platform: ct_clamp
+    sensor: ads_1
+    name: "Sensor 1"
+    update_interval: 10s
+
+  - platform: ct_clamp
+    sensor: ads_2
+    name: "Sensor 2"
+    update_interval: 10s
+
+  - platform: ct_clamp
+    sensor: ads_3
+    name: "Sensor 3"
+    update_interval: 10s
+
+  - platform: ct_clamp
+    sensor: ads_4
+    name: "Sensor 4"
+    update_interval: 10s

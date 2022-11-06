@@ -1,0 +1,6 @@
+substitutions:
+  friendly_name: "Wizzy Office"
+  device_name: "wizzy-office"
+
+packages:
+  airgradient: !include base/airgradient-esp32.yaml
