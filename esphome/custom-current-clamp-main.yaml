@@ -15,7 +15,7 @@ i2c:
 
 ads1115:
   - address: 0x48
-    id: adc
+    id: ads
     continuous_mode: true
 
 # https://github.com/Mottramlabs/4-Channel-Mains-Current-Sensor/issues/2
@@ -23,9 +23,9 @@ ads1115:
 #   - calibrate_linear:
 #       # Measured value of 0 maps to 0A
 #       - 0 -> 0
-#       # Known load: 7.73A
-#       # Value shown in logs: 0.057A
-#       - 0.057 -> 7.73
+#       # Known load: 2.00A
+#       # Value shown in logs: 0.014A
+#       - 0.014 -> 2.00
 
 sensor:
   - platform: ads1115
@@ -33,13 +33,13 @@ sensor:
     gain: 2.048
     internal: true
     id: ads_1
-  
+
   - platform: ads1115
     multiplexer: 'A1_GND'
     gain: 2.048
     internal: true
     id: ads_2
-  
+
   - platform: ads1115
     multiplexer: 'A2_GND'
     gain: 2.048
@@ -56,18 +56,38 @@ sensor:
     sensor: ads_1
     name: "Sensor 1"
     update_interval: 10s
+    sample_duration: 160ms
+    filters:
+      - calibrate_linear:
+          - 0 -> 0
+          - 0.028 -> 4.00
 
   - platform: ct_clamp
     sensor: ads_2
     name: "Sensor 2"
     update_interval: 10s
+    sample_duration: 160ms
+    filters:
+      - calibrate_linear:
+          - 0 -> 0
+          - 0.028 -> 4.00
 
   - platform: ct_clamp
     sensor: ads_3
     name: "Sensor 3"
     update_interval: 10s
+    sample_duration: 160ms
+    filters:
+      - calibrate_linear:
+          - 0 -> 0
+          - 0.028 -> 4.00
 
   - platform: ct_clamp
     sensor: ads_4
     name: "Sensor 4"
     update_interval: 10s
+    sample_duration: 160ms
+    filters:
+      - calibrate_linear:
+          - 0 -> 0
+          - 0.028 -> 4.00

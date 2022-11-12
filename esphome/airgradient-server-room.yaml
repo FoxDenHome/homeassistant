@@ -1,0 +1,6 @@
+substitutions:
+  friendly_name: "Server room"
+  device_name: "server-room"
+
+packages:
+  airgradient: !include base/airgradient-esp32.yaml

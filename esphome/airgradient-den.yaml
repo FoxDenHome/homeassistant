@@ -1,0 +1,6 @@
+substitutions:
+  friendly_name: "Den"
+  device_name: "den"
+
+packages:
+  airgradient: !include base/airgradient-esp32.yaml
