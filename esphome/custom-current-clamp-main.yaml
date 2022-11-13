@@ -24,8 +24,8 @@ ads1115:
 #       # Measured value of 0 maps to 0A
 #       - 0 -> 0
 #       # Known load: 2.00A
-#       # Value shown in logs: 0.014A
-#       - 0.014 -> 2.00
+#       # Value shown in logs: 0.028A
+#       - 0.028 -> 4.00
 
 sensor:
   - platform: ads1115
@@ -76,7 +76,8 @@ sensor:
 
   - platform: ct_clamp
     sensor: ads_3
-    name: "Neutral right current"
+    name: "Server rack current"
+    id: server_rack_current
     update_interval: 10s
     sample_duration: 160ms
     internal: true
@@ -87,7 +88,8 @@ sensor:
 
   - platform: ct_clamp
     sensor: ads_4
-    name: "Protective earth main current"
+    name: "Null current"
+    id: null_current
     update_interval: 10s
     sample_duration: 160ms
     internal: true
@@ -110,6 +112,7 @@ sensor:
     name: "Hot phase left power"
     device_class: power
     state_class: measurement
+    id: hot_phase_left_power
     unit_of_measurement: W
     update_interval: 10s
     lambda: |-
@@ -119,7 +122,21 @@ sensor:
     name: "Hot phase right power"
     device_class: power
     state_class: measurement
+    id: hot_phase_right_power
     unit_of_measurement: W
     update_interval: 10s
     lambda: |-
       return id(host_phase_right_current).state * id(hot_phase_right_voltage).state;
+
+  - platform: total_daily_energy
+    name: "Hot phase left consumption"
+    restore: false
+    power_id: hot_phase_left_power
+
+  - platform: total_daily_energy
+    name: "Hot phase right consumption"
+    restore: false
+    power_id: hot_phase_right_power
+
+time:
+  - platform: homeassistant
