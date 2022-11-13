@@ -54,7 +54,8 @@ sensor:
 
   - platform: ct_clamp
     sensor: ads_1
-    name: "Sensor 1"
+    name: "Hot phase left current"
+    id: host_phase_left_current
     update_interval: 10s
     sample_duration: 160ms
     filters:
@@ -64,7 +65,8 @@ sensor:
 
   - platform: ct_clamp
     sensor: ads_2
-    name: "Sensor 2"
+    name: "Hot phase right current"
+    id: host_phase_right_current
     update_interval: 10s
     sample_duration: 160ms
     filters:
@@ -74,9 +76,10 @@ sensor:
 
   - platform: ct_clamp
     sensor: ads_3
-    name: "Sensor 3"
+    name: "Neutral right current"
     update_interval: 10s
     sample_duration: 160ms
+    internal: true
     filters:
       - calibrate_linear:
           - 0 -> 0
@@ -84,10 +87,39 @@ sensor:
 
   - platform: ct_clamp
     sensor: ads_4
-    name: "Sensor 4"
+    name: "Protective earth main current"
     update_interval: 10s
     sample_duration: 160ms
+    internal: true
     filters:
       - calibrate_linear:
           - 0 -> 0
           - 0.028 -> 4.00
+
+  - platform: homeassistant
+    entity_id: sensor.dori_pc_voltage
+    internal: true
+    id: hot_phase_left_voltage
+
+  - platform: homeassistant
+    entity_id: sensor.ups_rack_input_voltage
+    internal: true
+    id: hot_phase_right_voltage
+
+  - platform: template
+    name: "Hot phase left power"
+    device_class: power
+    state_class: measurement
+    unit_of_measurement: W
+    update_interval: 10s
+    lambda: |-
+      return id(host_phase_left_current).state * id(hot_phase_left_voltage).state;
+
+  - platform: template
+    name: "Hot phase right power"
+    device_class: power
+    state_class: measurement
+    unit_of_measurement: W
+    update_interval: 10s
+    lambda: |-
+      return id(host_phase_right_current).state * id(hot_phase_right_voltage).state;
