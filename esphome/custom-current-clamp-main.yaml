@@ -116,7 +116,11 @@ sensor:
     unit_of_measurement: W
     update_interval: 10s
     lambda: |-
-      return id(host_phase_left_current).state * id(hot_phase_left_voltage).state;
+      float voltage = id(hot_phase_left_voltage).state;
+      if (isnan(voltage) || voltage < 10.0) {
+        voltage = 120.0;
+      }
+      return id(host_phase_left_current).state * voltage;
 
   - platform: template
     name: "Hot phase right power"
@@ -126,7 +130,11 @@ sensor:
     unit_of_measurement: W
     update_interval: 10s
     lambda: |-
-      return id(host_phase_right_current).state * id(hot_phase_right_voltage).state;
+      float voltage = id(hot_phase_right_voltage).state;
+      if (isnan(voltage) || voltage < 10.0) {
+        voltage = 120.0;
+      }
+      return id(host_phase_right_current).state * voltage;
 
   - platform: total_daily_energy
     name: "Hot phase left consumption"
