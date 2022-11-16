@@ -60,3 +60,9 @@ switch:
               - switch.lighthouse_bl_relay
               - switch.lighthouse_fl_relay
               - switch.valve_index_relay
+
+template:
+  - sensor:
+      - name: "Total Home Power"
+        state: "{{ (states('sensor.hot_phase_left_power')|float + states('sensor.hot_phase_right_power')|float) }}"
+        unit_of_measurement: "W"

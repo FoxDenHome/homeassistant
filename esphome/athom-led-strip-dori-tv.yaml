@@ -1,9 +1,0 @@
-substitutions:
-    friendly_name: "Dori TV"
-    device_name: "dori-tv"
-
-wifi:
-    use_address: 10.2.179.120
-
-packages:
-    athom-led-strip: !include base/athom-led-strip.yaml
