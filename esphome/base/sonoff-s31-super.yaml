@@ -37,8 +37,16 @@ sensor:
     power:
       name: "${friendly_name} Power"
       accuracy_decimals: 1
+      id: power
+  - platform: total_daily_energy
+    name: "${friendly_name} Consumption"
+    restore: false
+    power_id: power
 
 status_led:
   pin:
     number: GPIO13
     inverted: true
+
+time:
+  - platform: homeassistant

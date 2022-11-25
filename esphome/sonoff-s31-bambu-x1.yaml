@@ -1,6 +1,6 @@
 substitutions:
-  friendly_name: "CR-6 SE"
-  device_name: "cr6se"
+  friendly_name: "Bambu X1"
+  device_name: "bambu-x1"
 
 packages:
   sonoff-s31: !include base/sonoff-s31.yaml
