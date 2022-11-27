@@ -1,0 +1,6 @@
+substitutions:
+  friendly_name: "Dori Desk"
+  device_name: "dori-desk"
+
+packages:
+  custom: !include base/uplift.yaml
