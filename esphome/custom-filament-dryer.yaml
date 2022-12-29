@@ -1,0 +1,141 @@
+substitutions:
+    friendly_name: "Filament Dryer"
+    device_name: "filament-dryer"
+
+packages:
+    custom: !include base/custom.yaml
+
+esp32:
+    board: wemos_d1_mini32
+
+i2c:
+    sda: GPIO21
+    scl: GPIO22
+    scan: true
+    id: i2c_bus
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO23
+      mode:
+        input: true
+        pullup: true
+      inverted: True
+    name: "${friendly_name} PWR Button"
+    internal: true
+  - platform: gpio
+    pin:
+      number: GPIO32
+      mode:
+        input: true
+        pullup: true
+      inverted: True
+    name: "${friendly_name} TimeUp Button"
+    internal: true
+  - platform: gpio
+    pin:
+      number: GPIO26
+      mode:
+        input: true
+        pullup: true
+      inverted: True
+    name: "${friendly_name} TimeDown Button"
+    internal: true
+  - platform: gpio
+    pin:
+      number: GPIO25
+      mode:
+        input: true
+        pullup: true
+      inverted: True
+    name: "${friendly_name} TempUp Button"
+    internal: true
+  - platform: gpio
+    pin:
+      number: GPIO33
+      mode:
+        input: true
+        pullup: true
+      inverted: True
+    name: "${friendly_name} TempDown Button"
+    internal: true
+
+output:
+  - platform: ledc
+    pin: GPIO17
+    id: fan_pwm_control
+    frequency: 25kHz
+  - platform: ac_dimmer
+    id: heater_dimmer
+    gate_pin: GPIO18
+    zero_cross_pin:
+        number: GPIO19
+        mode:
+            input: true
+        inverted: yes
+
+fan:
+  - platform: speed
+    output: fan_pwm_control
+    name: "${friendly_name} Fan"
+
+climate:
+  - platform: pid
+    id: dryer_climate
+    name: "${friendly_name} Heater"
+    sensor: ntc_temperature
+    default_target_temperature: 0°C
+    heat_output: heater_dimmer
+    control_parameters:
+        kp: 0.0
+        ki: 0.0
+        kd: 0.0
+
+sensor:
+  - platform: pulse_counter
+    pin: GPIO16
+    id: fan_tachometer
+    unit_of_measurement: 'RPM'
+    update_interval: 60s
+    filters:
+        - multiply: 0.5
+  - platform: sht3xd
+    temperature:
+        id: sht_temperature
+        name: "${friendly_name} Temperature"
+    humidity:
+        id: sht_humidity
+        name: "${friendly_name} Humidity"
+    address: 0x44
+    update_interval: 60s
+  - platform: ntc
+    sensor: ntc_resistance
+    name: "${friendly_name} NTC Temperature"
+    id: ntc_temperature
+    calibration:
+        b_constant: 4072
+        reference_temperature: 25°C
+        reference_resistance: 100kOhm
+  - platform: resistance
+    id: ntc_resistance
+    sensor: ntc_adc
+    configuration: DOWNSTREAM
+    resistor: 10kOhm
+    name: Resistance Sensor
+  - platform: adc
+    id: ntc_adc
+    pin: GPIO36
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x32"
+    address: 0x3C
+    lambda: |-
+        //it.print(0, 0, id(font), "Hello World!");
+
+button:
+  - platform: template
+    name: "PID Climate Autotune"
+    on_press:
+      - climate.pid.autotune: dryer_climate
