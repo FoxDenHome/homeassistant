@@ -66,15 +66,32 @@ output:
     pin: GPIO17
     id: fan_pwm_control
     frequency: 25kHz
+    zero_means_zero: true
+    min_power: 0.01
   - platform: ac_dimmer
     id: heater_dimmer
     gate_pin: GPIO18
+    zero_means_zero: true
+    min_power: 0.01
     zero_cross_pin:
         number: GPIO19
         mode:
             input: true
         inverted: yes
-
+  - platform: template
+    id: heater_and_fan
+    type: float
+    write_action:
+      - output.set_level:
+          id: heater_dimmer
+          level: !lambda return state;
+      - output.set_level:
+          id: fan_pwm_control
+          level: !lambda |
+            if (state > 0.0f) {
+              return min(state, 0.5f);
+            }
+            return 0;
 fan:
   - platform: speed
     output: fan_pwm_control
@@ -86,7 +103,8 @@ climate:
     name: "${friendly_name} Heater"
     sensor: ntc_temperature
     default_target_temperature: 0°C
-    heat_output: heater_dimmer
+    heat_output: heater_and_fan
+    cool_output: fan_pwm_control
     control_parameters:
         kp: 0.0
         ki: 0.0
