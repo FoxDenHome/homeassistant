@@ -66,3 +66,9 @@ template:
       - name: "Total Home Power"
         state: "{{ (states('sensor.hot_phase_left_power')|float + states('sensor.hot_phase_right_power')|float) }}"
         unit_of_measurement: "W"
+
+zha:
+  zigpy_config:
+    network:
+      channel: 15
+      channels: [15]
