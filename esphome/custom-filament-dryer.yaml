@@ -14,6 +14,44 @@ i2c:
     scan: true
     id: i2c_bus
 
+globals:
+  - id: drying_start
+    type: unsigned long
+    restore_value: false
+    initial_value: '0'
+
+number:
+  - platform: template
+    id: heat_temp
+    name: "${friendly_name} Heating temperature"
+    unit_of_measurement: °C
+    min_value: 20
+    max_value: 100
+    step: 1
+    optimistic: true
+    restore_value: true
+    initial_value: 60
+  - platform: template
+    id: cool_temp
+    name: "${friendly_name} Cooling temperature"
+    unit_of_measurement: °C
+    min_value: 20
+    max_value: 100
+    step: 1
+    optimistic: true
+    restore_value: true
+    initial_value: 40
+  - platform: template
+    id: drying_time
+    name: "${friendly_name} Timer"
+    unit_of_measurement: s
+    min_value: 0
+    max_value: 86400
+    step: 1
+    optimistic: true
+    restore_value: true
+    initial_value: 21600
+
 binary_sensor:
   - platform: gpio
     pin:
@@ -21,45 +59,93 @@ binary_sensor:
       mode:
         input: true
         pullup: true
-      inverted: True
+      inverted: true
     name: "${friendly_name} PWR Button"
     internal: true
+    filters:
+      - delayed_on: 10ms
+    on_press:
+      lambda: |-
+        switch (id(dryer_climate).mode) {
+          case esphome::climate::ClimateMode::CLIMATE_MODE_HEAT_COOL:
+          case esphome::climate::ClimateMode::CLIMATE_MODE_COOL:
+            id(dryer_estop).press();
+            break;
+          case esphome::climate::ClimateMode::CLIMATE_MODE_HEAT:
+            id(dryer_stop).press();
+            break;
+          case  esphome::climate::ClimateMode::CLIMATE_MODE_OFF:
+            id(dryer_start).press();
+            break;
+        }
   - platform: gpio
     pin:
       number: GPIO32
       mode:
         input: true
         pullup: true
-      inverted: True
+      inverted: true
     name: "${friendly_name} TimeUp Button"
     internal: true
+    filters:
+      - delayed_on: 10ms
+    on_press:
+      lambda: |-
+        id(drying_time).state += 3600;
+        if (id(drying_time).state > 86400) {
+          id(drying_time).state = 86400;
+        }
   - platform: gpio
     pin:
       number: GPIO26
       mode:
         input: true
         pullup: true
-      inverted: True
+      inverted: true
     name: "${friendly_name} TimeDown Button"
     internal: true
+    filters:
+      - delayed_on: 10ms
+    on_press:
+      lambda: |-
+        id(drying_time).state -= 3600;
+        if (id(drying_time).state < 0) {
+          id(drying_time).state = 0;
+        }
   - platform: gpio
     pin:
       number: GPIO25
       mode:
         input: true
         pullup: true
-      inverted: True
+      inverted: true
     name: "${friendly_name} TempUp Button"
     internal: true
+    filters:
+      - delayed_on: 10ms
+    on_press:
+      lambda: |-
+        id(heat_temp).state += 5;
+        if (id(heat_temp).state > 100) {
+          id(heat_temp).state = 100;
+        }
   - platform: gpio
     pin:
       number: GPIO33
       mode:
         input: true
         pullup: true
-      inverted: True
+      inverted: true
     name: "${friendly_name} TempDown Button"
     internal: true
+    filters:
+      - delayed_on: 10ms
+    on_press:
+      lambda: |-
+        id(heat_temp).state -= 5;
+        if (id(heat_temp).state < 20) {
+          id(heat_temp).state = 20;
+        }
 
 output:
   - platform: ledc
@@ -82,9 +168,9 @@ output:
     id: heater_and_fan
     type: float
     write_action:
-      #- output.set_level:
-      #    id: heater_dimmer
-      #    level: !lambda return state;
+      - output.set_level:
+          id: heater_dimmer
+          level: !lambda return state;
       - output.set_level:
           id: fan_pwm_control
           level: !lambda |
@@ -127,28 +213,6 @@ climate:
           call.perform();
         }
 
-number:
-  - platform: template
-    id: heat_temp
-    name: "${friendly_name} Heating temperature"
-    unit_of_measurement: °C
-    min_value: 20
-    max_value: 100
-    step: 1
-    optimistic: true
-    restore_value: true
-    initial_value: 60
-  - platform: template
-    id: cool_temp
-    name: "${friendly_name} Cooling temperature"
-    unit_of_measurement: °C
-    min_value: 20
-    max_value: 100
-    step: 1
-    optimistic: true
-    restore_value: true
-    initial_value: 40
-
 sensor:
   - platform: pulse_counter
     pin: GPIO16
@@ -185,6 +249,25 @@ sensor:
     pin: GPIO36
     attenuation: 11db
     update_interval: 10s
+  - platform: template
+    id: time_left
+    name: "${friendly_name} Time Left"
+    unit_of_measurement: s
+    update_interval: 1s
+    lambda: |-
+      if (id(dryer_climate).mode != esphome::climate::ClimateMode::CLIMATE_MODE_HEAT) {
+        return 0.f;
+      }
+      float drying_time_l = id(drying_time).state;
+      if (drying_time_l < 1.f) {
+        return -1.f;
+      }
+      float time_passed = ((millis() - id(drying_start)) / 1000.f);
+      if (time_passed > drying_time_l) {
+        id(dryer_stop).press();
+        return 0.f;
+      }
+      return drying_time_l - time_passed;
 
 font:
   - file: "fonts/materialdesignicons-webfont.ttf"
@@ -205,33 +288,39 @@ display:
     model: "SSD1306 128x32"
     address: 0x3C
     lambda: |-
-      const char* climate_action_icon = "󱈸"; // mdi-exclamation-thick
+      const char* climate_icon = "󱈸"; // mdi-exclamation-thick
 
-      switch (id(dryer_climate).action) {
-        case esphome::climate::ClimateAction::CLIMATE_ACTION_OFF:
-          climate_action_icon = "󰤆"; // mdi-power-standby
+      switch (id(dryer_climate).mode) {
+        case esphome::climate::ClimateMode::CLIMATE_MODE_OFF:
+          climate_icon = "󰤆"; // mdi-power-standby
           break;
-        case esphome::climate::ClimateAction::CLIMATE_ACTION_IDLE:
-          climate_action_icon =  "󰤄"; // mdi-power-sleep
+        case esphome::climate::ClimateMode::CLIMATE_MODE_COOL:
+          climate_icon = "󱩱"; // mdi-snowflake-thermometer
           break;
-        case esphome::climate::ClimateAction::CLIMATE_ACTION_COOLING:
-          climate_action_icon = "󱩱"; // mdi-snowflake-thermometer
-          break;
-        case esphome::climate::ClimateAction::CLIMATE_ACTION_HEATING:
-          climate_action_icon = "󱣖"; // mdi-sun-thermometer
+        case esphome::climate::ClimateMode::CLIMATE_MODE_HEAT:
+          climate_icon = "󱣖"; // mdi-sun-thermometer
           break;
       }
 
-      it.print(0, 27, id(icon_font_24), TextAlign::BASELINE_LEFT, climate_action_icon);
-      it.printf(29, 15, id(font_16), TextAlign::BASELINE_LEFT, "%.1f C", id(dryer_climate).current_temperature);
+      it.print(0, 27, id(icon_font_24), TextAlign::BASELINE_LEFT, climate_icon);
+      it.printf(29, 15, id(font_16), TextAlign::BASELINE_LEFT, "%.1f°", id(dryer_climate).current_temperature);
       it.printf(127, 15, id(font_16), TextAlign::BASELINE_RIGHT, "%.0f %%", id(sht_humidity).state);
 
+      float target_temp;
+      unsigned long time_left_l;
       if (id(dryer_climate).mode == esphome::climate::ClimateMode::CLIMATE_MODE_HEAT) {
-        it.printf(29, 31, id(font_16), TextAlign::BASELINE_LEFT, "%.0f C", id(dryer_climate).target_temperature);
+        target_temp = id(dryer_climate).target_temperature;
+        time_left_l = id(time_left).state;
       } else {
-        it.printf(29, 31, id(font_16), TextAlign::BASELINE_LEFT, "%.0f C", id(heat_temp).state);
+        target_temp = id(heat_temp).state;
+        time_left_l = id(drying_time).state;
       }
-      it.print(127, 31, id(font_16), TextAlign::BASELINE_RIGHT, "13:37:00");
+      it.printf(29, 31, id(font_16), TextAlign::BASELINE_LEFT, "%.0f°", target_temp);
+      if (id(drying_time).state > 0) {
+        it.printf(127, 31, id(font_16), TextAlign::BASELINE_RIGHT, "%02d:%02d:%02d", (time_left_l / 3600), (time_left_l / 60) % 60, time_left_l % 60);
+      } else {
+        it.print(127, 31, id(font_16), TextAlign::BASELINE_RIGHT, "--:--:--");
+      }
 
 button:
   - platform: template
@@ -241,17 +330,29 @@ button:
       - climate.pid.autotune: dryer_climate
   - platform: template
     name: "${friendly_name} Start"
+    id: dryer_start
     on_press:
       - lambda: |-
+          id(drying_start) = millis();
           auto call = id(dryer_climate).make_call();
           call.set_mode("HEAT");
           call.set_target_temperature(id(heat_temp).state);
           call.perform();
   - platform: template
     name: "${friendly_name} Stop"
+    id: dryer_stop
     on_press:
       - lambda: |-
           auto call = id(dryer_climate).make_call();
           call.set_mode("COOL");
           call.set_target_temperature(id(cool_temp).state);
+          call.perform();
+  - platform: template
+    name: "${friendly_name} E-Stop"
+    id: dryer_estop
+    on_press:
+      - lambda: |-
+          auto call = id(dryer_climate).make_call();
+          call.set_mode("OFF");
+          call.set_target_temperature(id(heat_temp).state);
           call.perform();
