@@ -36,6 +36,21 @@ wifi:
 
 captive_portal:
 
+text_sensor:
+  - platform: version
+    id: esphome_device_version
+    internal: true
+    hide_timestamp: true
+    on_value:
+      - lambda: id(esphome_device_update_available).state = id(esphome_device_version).state != id(esphome_server_version).state;
+  - platform: homeassistant
+    entity_id: update.esphome_update
+    internal: true
+    id: esphome_server_version
+    attribute: installed_version
+    on_value:
+      - lambda: id(esphome_device_update_available).state = id(esphome_device_version).state != id(esphome_server_version).state;
+
 button:
   - platform: safe_mode
     name: "${friendly_name} ${type_prefix} Restart in Safe Mode"
@@ -45,6 +60,9 @@ binary_sensor:
   - platform: status
     name: "${friendly_name} ${type_prefix} Status"
     internal: true
+  - platform: template
+    id: esphome_device_update_available
+    name: "${friendly_name} ${type_prefix} Update available"
 
 sensor:
   - platform: wifi_signal

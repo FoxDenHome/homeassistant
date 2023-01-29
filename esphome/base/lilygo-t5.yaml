@@ -5,10 +5,21 @@ substitutions:
 packages:
   common: !include common.yaml
 
+logger:
+  baud_rate: 115200
+  level: DEBUG
+
+wifi:
+  fast_connect: true
+
 esp32:
   board: esp32dev
   framework:
     type: arduino
+
+esphome:
+  includes:
+    - base/lilygo-t5.h
 
 external_components:
   - source: github://ashald/esphome@lilygo-t5-47
@@ -24,65 +35,203 @@ i2c:
   scl: 14
   scan: True
 
-font:
-  - file: "fonts/SourceSansPro-Regular.ttf"
-    id: font_small
-    size: 28
-  - file: "fonts/SourceSansPro-Regular.ttf"
-    id: font_large
-    size: 56
+globals:
+  - id: sensor_ready_bitmask
+    type: uint16_t
+    restore_value: no
+    initial_value: "0"
+  - id: all_sensors_ready
+    type: bool
+    restore_value: no
+    initial_value: "false"
 
-  - file: "fonts/materialdesignicons-webfont.ttf"
-    id: font_icons
-    size: 160
-    glyphs:
-      - "\U000F0594" # clear-night
-      - "\U000F0590" # cloudy
-      - "\U000F0595" # partlycloudy
-      - "\U000F0591" # fog
-      - "\U000F0592" # hail
-      - "\U000F0593" # lightning
-      - "\U000F067E" # lightning-rainy
-      - "\U000F0596" # pouring
-      - "\U000F0597" # rainy
-      - "\U000F0F36" # snowy
-      - "\U000F067F" # snowy-rainy
-      - "\U000F0599" # sunny
-      - "\U000F059D" # windy
-      - "\U000F059E" # windy-variant
-      - "\U000F0F38" # exceptional
+script:
+  - id: render_if_ready
+    mode: single
+    then:
+      - logger.log: render_if_ready
+      - if:
+          condition:
+            lambda: return id(all_sensors_ready);
+          then:
+            - logger.log: display_update
+            - delay: 10s
+            #- component.update:
+            #    id: t5_display
+            #- delay: 10s
+            - if:
+                condition:
+                  lambda: return id(deep_sleep_enabled).state;
+                then:
+                  - deep_sleep.enter:
+                      id: battery_deep_sleep
+  - id: mark_sensor_ready
+    mode: queued
+    parameters:
+      idx: uint16_t
+    then:
+      - lambda: id(sensor_ready_bitmask) |= (1 << idx);
+      - logger.log:
+          format: all_ready_render %x
+          args: [id(sensor_ready_bitmask)]
+      - if:
+          condition:
+            lambda: return id(sensor_ready_bitmask) == 0b111 && !id(all_sensors_ready);
+          then:
+            - globals.set:
+                id: all_sensors_ready
+                value: "true"
+            - logger.log: all_ready_render
+            - script.execute: render_if_ready
 
-  - file: "fonts/materialdesignicons-webfont.ttf"
-    id: font_icons_small
-    size: 56
-    glyphs:
-      - "\U000F10C2" # Temperature High
-      - "\U000F10C3" # Temperature Low
-      - "\U000F07E4" # CO2
-      - "\U000F054B" # umbrella
-      - "\U000F0592" # hail
-      - "\U000F0593" # lightning
-      - "\U000F067E" # lightning-rainy
-      - "\U000F0597" # rainy
-      - "\U000F0F36" # snowy
-      - "\U000F0594" # clear-night
-      - "\U000F0599" # sunny
-      - "\U000F07CA" # fuel
-      - "\U000F024A" # flower
-      - "\U000F051F" # time-remaining
-      - "\U000F140B" # Energy
+deep_sleep:
+  id: battery_deep_sleep
+  run_duration: 5min
+  sleep_duration: 1h
 
+binary_sensor:
+  - id: deep_sleep_enabled
+    name: "${friendly_name} Deep Sleep Enable"
+    platform: template
+
+sensor:
+  - platform: adc
+    id: battery
+    pin: 36
+    attenuation: 11db
+    update_interval: 10s
+    filters:
+      - multiply: 2.0
+      - lambda: |-
+          if (x < 0.5) {
+            return {};
+          }
+          return x;
+    on_value:
+      - if:
+          condition:
+            sensor.in_range:
+              id: battery
+              above: 4.20
+          then:
+            - deep_sleep.prevent: battery_deep_sleep
+            - binary_sensor.template.publish:
+                id: deep_sleep_enabled
+                state: OFF
+          else:
+            - deep_sleep.allow: battery_deep_sleep
+            - binary_sensor.template.publish:
+                id: deep_sleep_enabled
+                state: ON
+      - script.execute:
+          id: mark_sensor_ready
+          idx: 0
+  - platform: wifi_signal
+    id: wifi_signal_rssi
+    update_interval: 10s
+    filters:
+      - lambda: |-
+          if (x >= 0 || isnan(x)) {
+            return {};
+          }
+          return x;
+    on_value:
+      - script.execute:
+          id: mark_sensor_ready
+          idx: 1
 time:
   - platform: homeassistant
+    id: time_now
+    on_time_sync:
+      - script.execute:
+          id: mark_sensor_ready
+          idx: 2
+font:
+  - file: "gfonts://Roboto"
+    id: font_small
+    size: 36
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: font_icon_small
+    size: 36
+    glyphs:
+      - "󱊣"
+      - "󱊢"
+      - "󱊡"
+      - "󰂎"
+      - "󰢿"
+      - "󰢾"
+      - "󰢽"
+      - "󰢼"
+      - "󰂄"
+
+  - file: "gfonts://Roboto"
+    id: font_medium
+    size: 48
+
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: font_icon_xlarge
+    size: 128
+    glyphs:
+      - "󰖓"
 
 display:
   - platform: lilygo_t5_47
     id: t5_display
-    update_interval: 30s
+    update_interval: 60s
     lambda: |-
-      #define xres 960
-      #define yres 540
-      #define x_pad 10 // border padding
-      #define y_pad 10 // border padding      
+      const int hour = id(time_now).now().hour;
 
-      it.printf(xres-x_pad, yres-y_pad/2, id(font_footer), TextAlign::BASELINE_RIGHT, "Hello World");
+      int temps[][2] = {
+        {20, 20},
+        {-20, -20},
+        {0, 0},
+        {20, -20},
+        {60, 90},
+        {0, 20},
+        {20, 0},
+      };
+
+      it.clear();
+
+      it.strftime(it.get_width()/2 ,30, id(font_small), TextAlign::BASELINE_CENTER, "%Y.%m.%d %H:%M", id(time_now).now());
+
+      // battery state
+      it.printf(it.get_width()-45,30,id(font_small),TextAlign::BASELINE_RIGHT,"%.1fV", id(battery).state);
+      if (id(battery).state > 4.20) {
+          it.print(it.get_width()-40,30,id(font_icon_small),TextAlign::BASELINE_LEFT,"󰂄");
+      } else if (id(battery).state >= 3.30) {
+          it.print(it.get_width()-40,30,id(font_icon_small),TextAlign::BASELINE_LEFT,"󱊣");
+      } else if (id(battery).state >= 3.25) {
+          it.print(it.get_width()-40,30,id(font_icon_small),TextAlign::BASELINE_LEFT,"󱊢");
+      } else if (id(battery).state >= 3.00) {
+          it.print(it.get_width()-40,30,id(font_icon_small),TextAlign::BASELINE_LEFT,"󱊡");
+      } else {
+          it.print(it.get_width()-40,30,id(font_icon_small),TextAlign::BASELINE_LEFT,"󰂎");
+      }
+
+      // WiFi state
+      if (isnan(id(wifi_signal_rssi).state) || id(wifi_signal_rssi).state >= 0 || id(wifi_signal_rssi).state < -100) {
+        it.print(2,32,id(font_icon_small),TextAlign::BASELINE_LEFT,"󰢿");
+      } else {
+        it.printf(42,30,id(font_small),TextAlign::BASELINE_LEFT,"%.0fdBm", id(wifi_signal_rssi).state);
+        if (id(wifi_signal_rssi).state > -50) {
+            it.print(2,32,id(font_icon_small),TextAlign::BASELINE_LEFT,"󰢾");
+        } else if (id(wifi_signal_rssi).state > -70) {
+            it.print(2,32,id(font_icon_small),TextAlign::BASELINE_LEFT,"󰢽");
+        } else if (id(wifi_signal_rssi).state > -90) {
+            it.print(2,32,id(font_icon_small),TextAlign::BASELINE_LEFT,"󰢼");
+        }
+      }
+
+      it.filled_rectangle(0,36,it.get_width(),3,COLOR_ON);
+
+      for (int i = 0; i < 6; i++) {
+          int baseX = i * 160;
+          it.print(baseX+80,140,id(font_icon_xlarge),TextAlign::CENTER,"󰖓");
+          it.printf(baseX+5,80,id(font_medium),TextAlign::BASELINE_LEFT,"%d", (hour + i) % 24);
+          it.printf(baseX+155,240,id(font_small),TextAlign::BASELINE_RIGHT,"%d / %d", temps[i][0], temps[i][1]);
+          if (i != 0) {
+            it.filled_rectangle(baseX-1,36,3,210,COLOR_ON);
+          }
+      }
+      it.filled_rectangle(0,246,it.get_width(),3,COLOR_ON);
