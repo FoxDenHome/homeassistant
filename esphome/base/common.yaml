@@ -16,7 +16,7 @@ web_server:
   auth:
     username: !secret web_user
     password: !secret web_password
-  #local: true
+  local: true
   version: 2
   include_internal: true
 
