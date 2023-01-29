@@ -1,6 +1,0 @@
-substitutions:
-  friendly_name: "Dori Office Fan"
-  device_name: "dori-office-fan"
-
-packages:
-  sonoff-s31: !include base/sonoff-s31.yaml

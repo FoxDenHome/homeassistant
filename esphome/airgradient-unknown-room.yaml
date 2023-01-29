@@ -1,6 +1,0 @@
-substitutions:
-  friendly_name: "Unknown room"
-  device_name: "unknown-room"
-
-packages:
-  airgradient: !include base/airgradient-esp32.yaml
