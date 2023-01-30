@@ -5,8 +5,16 @@ substitutions:
 packages:
     custom: !include base/custom.yaml
 
+logger:
+    baud_rate: 0
+    level: INFO
+
+esphome:
+    platformio_options:
+        board_build.f_cpu: 160000000L
+
 esp8266:
-    board: esp01_1m
+    board: esp12e
 
 uart:
     baud_rate: 115200
@@ -19,7 +27,7 @@ modbus_controller:
   - id: modbus_psu
     address: 0x1
     setup_priority: -10
-    update_interval: 10s
+    update_interval: 1s
 
 sensor:
   - platform: modbus_controller
@@ -28,14 +36,14 @@ sensor:
     register_type: holding
     address: 0
     value_type: U_WORD
-    skip_updates: 60
+    skip_updates: 255
   - platform: modbus_controller
     modbus_controller_id: modbus_psu
     name: "${friendly_name} PSU Serial"
     register_type: holding
     address: 1
     value_type: U_DWORD
-    skip_updates: 60
+    skip_updates: 255
   - platform: modbus_controller
     modbus_controller_id: modbus_psu
     name: "${friendly_name} PSU firmware"
@@ -43,7 +51,7 @@ sensor:
     address: 3
     value_type: U_WORD
     accuracy_decimals: 2
-    skip_updates: 60
+    skip_updates: 255
     filters:
         - multiply: 0.01
   - platform: modbus_controller
@@ -54,7 +62,6 @@ sensor:
     register_type: holding
     address: 4
     value_type: S_DWORD
-    skip_updates: 6
 #   - platform: modbus_controller
 #     modbus_controller_id: modbus_psu
 #     name: "${friendly_name} Internal Temperature"
@@ -107,12 +114,6 @@ sensor:
     accuracy_decimals: 2
     filters:
         - multiply: 0.01
-  - platform: modbus_controller
-    modbus_controller_id: modbus_psu
-    name: "${friendly_name} Battery Mode"
-    register_type: holding
-    address: 32
-    value_type: U_WORD
   - platform: modbus_controller
     modbus_controller_id: modbus_psu
     name: "${friendly_name} Measured Battery Voltage"
@@ -176,9 +177,15 @@ binary_sensor:
     address: 16
   - platform: modbus_controller
     modbus_controller_id: modbus_psu
-    name: "${friendly_name} Output Constant Current Mode"
+    name: "${friendly_name} Output CC Mode"
+    bitmask: 1
     register_type: holding
     address: 17
+  - platform: modbus_controller
+    modbus_controller_id: modbus_psu
+    name: "${friendly_name} Battery Mode"
+    register_type: holding
+    address: 32
 
 number:
   - platform: modbus_controller
