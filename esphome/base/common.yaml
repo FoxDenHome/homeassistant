@@ -66,6 +66,7 @@ binary_sensor:
     internal: true
   - platform: template
     id: esphome_device_update_available
+    device_class: update
     name: "${friendly_name} ${type_prefix} Update available"
 
 sensor:
