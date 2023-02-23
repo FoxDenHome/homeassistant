@@ -5,10 +5,6 @@ substitutions:
 packages:
   common: !include common.yaml
 
-logger:
-  baud_rate: 115200
-  level: DEBUG
-
 wifi:
   fast_connect: true
 
