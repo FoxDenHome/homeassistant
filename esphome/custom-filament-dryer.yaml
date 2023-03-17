@@ -275,11 +275,13 @@ sensor:
     configuration: DOWNSTREAM
     resistor: 10kOhm
     name: Resistance Sensor
+    internal: true
   - platform: adc
     id: ntc_adc
     pin: GPIO36
     attenuation: 11db
     update_interval: 10s
+    internal: true
   - platform: template
     id: time_left
     name: "${friendly_name} Time Left"
