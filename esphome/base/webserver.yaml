@@ -1,6 +1,4 @@
-prometheus:
-
-  # Enable webserver (required for prometheus)
+# Enable webserver (required for prometheus)
 web_server:
   auth:
     username: !secret web_user
@@ -8,3 +6,5 @@ web_server:
   local: true
   version: 2
   include_internal: true
+
+prometheus:

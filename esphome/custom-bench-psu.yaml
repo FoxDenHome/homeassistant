@@ -4,6 +4,7 @@ substitutions:
 
 packages:
   custom: !include base/custom.yaml
+  webserver: !include base/webserver.yaml
 
 esphome:
   platformio_options:

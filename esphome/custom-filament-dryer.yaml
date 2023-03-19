@@ -4,6 +4,7 @@ substitutions:
 
 packages:
     custom: !include base/custom.yaml
+    webserver: !include base/webserver.yaml
 
 esp32:
     board: wemos_d1_mini32
