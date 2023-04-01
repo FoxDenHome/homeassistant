@@ -20,6 +20,10 @@ globals:
     type: unsigned long
     restore_value: false
     initial_value: '0'
+  - id: last_action
+    type: unsigned long
+    restore_value: false
+    initial_value: '0'
 
 number:
   - platform: template
@@ -79,6 +83,7 @@ binary_sensor:
             id(dryer_start).press();
             break;
         }
+        id(last_action) = millis();
   - platform: gpio
     pin:
       number: GPIO32
@@ -96,6 +101,7 @@ binary_sensor:
         if (id(drying_time).state > 86400) {
           id(drying_time).state = 86400;
         }
+        id(last_action) = millis();
   - platform: gpio
     pin:
       number: GPIO26
@@ -113,6 +119,7 @@ binary_sensor:
         if (id(drying_time).state < 0) {
           id(drying_time).state = 0;
         }
+        id(last_action) = millis();
   - platform: gpio
     pin:
       number: GPIO25
@@ -130,6 +137,7 @@ binary_sensor:
         if (id(heat_temp).state > 100) {
           id(heat_temp).state = 100;
         }
+        id(last_action) = millis();
   - platform: gpio
     pin:
       number: GPIO33
@@ -147,6 +155,7 @@ binary_sensor:
         if (id(heat_temp).state < 20) {
           id(heat_temp).state = 20;
         }
+        id(last_action) = millis();
 
 output:
   - platform: ledc
@@ -322,6 +331,11 @@ display:
     model: "SSD1306 128x32"
     address: 0x3C
     lambda: |-
+      unsigned long time_since_last_action = millis() - id(last_action);
+      if (id(dryer_climate).mode == esphome::climate::ClimateMode::CLIMATE_MODE_OFF && time_since_last_action > 60000UL) {
+        return; // Display sleep
+      }
+
       const char* climate_icon = "󱈸"; // mdi-exclamation-thick
 
       switch (id(dryer_climate).mode) {
@@ -372,6 +386,7 @@ button:
           call.set_mode("HEAT");
           call.set_target_temperature(id(heat_temp).state);
           call.perform();
+          id(last_action) = millis();
   - platform: template
     name: "${friendly_name} Stop"
     id: dryer_stop
@@ -381,6 +396,7 @@ button:
           call.set_mode("COOL");
           call.set_target_temperature(id(cool_temp).state);
           call.perform();
+          id(last_action) = millis();
   - platform: template
     name: "${friendly_name} E-Stop"
     id: dryer_estop
@@ -390,3 +406,4 @@ button:
           call.set_mode("OFF");
           call.set_target_temperature(id(heat_temp).state);
           call.perform();
+          id(last_action) = millis();
