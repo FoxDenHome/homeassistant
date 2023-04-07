@@ -1,0 +1,6 @@
+substitutions:
+  friendly_name: "Dori Desktop"
+  device_name: "dori-desktop"
+
+packages:
+  sonoff-s31-defon: !include base/sonoff-s31-defon.yaml
