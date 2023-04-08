@@ -13,6 +13,7 @@ api:
 
 ota:
   password: !secret ota_password
+  id: main_ota
 
 wifi:
   ssid: !secret wifi_ssid
