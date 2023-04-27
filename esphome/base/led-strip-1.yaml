@@ -1,0 +1,23 @@
+substitutions:
+  type_prefix: "LED strip"
+  type_prefix_host: "led-strip"
+
+packages:
+  common: !include common.yaml
+
+esp32:
+  board: wemos_d1_mini32
+
+wled:
+
+light:
+  - platform: neopixelbus
+    type: BRG
+    variant: WS2811
+    pin: GPIO13
+    name: "${friendly_name}"
+    method:
+      type: esp32_i2s
+      bus: 0
+    effects:
+      - wled:

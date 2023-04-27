@@ -1,0 +1,12 @@
+substitutions:
+    friendly_name: "Dori Office Ceiling Strip"
+    device_name: "dori-office-ceiling"
+    led_count_1: "60"
+    led_max_1: "59"
+    led_reverse_1: "false"
+    led_count_2: "24"
+    led_max_2: "23"
+    led_reverse_2: "true"
+
+packages:
+    custom: !include base/led-strip-2.yaml

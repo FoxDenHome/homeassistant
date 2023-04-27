@@ -1,0 +1,26 @@
+esphome:
+  name: "${type_prefix_host}-${device_name}"
+
+# Enable logging (and disable serial logging)
+logger:
+  baud_rate: 0
+  level: INFO
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  password: !secret ota_password
+  id: main_ota
+
+button:
+  - platform: safe_mode
+    name: "${friendly_name} ${type_prefix} Restart in Safe Mode"
+    internal: true
+
+binary_sensor:
+  - platform: status
+    name: "${friendly_name} ${type_prefix} Status"
+    internal: true

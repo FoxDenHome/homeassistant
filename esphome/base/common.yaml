@@ -1,33 +1,9 @@
-esphome:
-  name: "${type_prefix_host}-${device_name}"
-
-# Enable logging
-logger:
-  baud_rate: 0
-  level: INFO
-
-# Enable Home Assistant API
-api:
-  encryption:
-    key: !secret api_encryption_key
-
-ota:
-  password: !secret ota_password
-  id: main_ota
+packages:
+  common-nsto-wifi: !include common-no-wifi.yaml
 
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
-
-button:
-  - platform: safe_mode
-    name: "${friendly_name} ${type_prefix} Restart in Safe Mode"
-    internal: true
-
-binary_sensor:
-  - platform: status
-    name: "${friendly_name} ${type_prefix} Status"
-    internal: true
 
 sensor:
   - platform: wifi_signal
