@@ -54,8 +54,8 @@ button:
 switch:
   - platform: gpio
     pin:
-      number: D1
-      inverted: true
+      number: D5
+      inverted: false
     id: input_toggle_output
     name: "Input toggle"
     on_turn_on:

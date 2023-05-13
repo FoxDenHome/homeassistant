@@ -9,4 +9,4 @@ substitutions:
     led_reverse_2: "true"
 
 packages:
-    custom: !include base/led-strip-2.yaml
+    custom: !include base/led-strip-2-wired.yaml

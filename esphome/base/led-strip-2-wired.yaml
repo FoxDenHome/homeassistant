@@ -1,0 +1,59 @@
+substitutions:
+  type_prefix: "LED strip"
+  type_prefix_host: "led-strip"
+
+packages:
+  common: !include common-no-wifi.yaml
+
+esp32:
+  board: wt32-eth01
+# GPIO17
+# GPIO35 = FAIL
+# GPIO33
+# GPIO32
+
+ethernet:
+  type: LAN8720
+  power_pin: GPIO16
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk_mode: GPIO0_IN
+  phy_addr: 0
+
+wled:
+
+light:
+  - platform: partition
+    name: "${friendly_name}"
+    restore_mode: ALWAYS_OFF
+    segments:
+      - id: led_strip_1
+        from: 0
+        to: ${led_max_1}
+        reversed: ${led_reverse_1}
+      - id: led_strip_2
+        from: 0
+        to: ${led_max_2}
+        reversed: ${led_reverse_2}
+    effects:
+      - wled:
+  - platform: neopixelbus
+    type: BRG
+    variant: WS2811
+    pin: GPIO17
+    num_leds: ${led_count_1}
+    id: led_strip_1
+    internal: true
+    method:
+      type: esp32_i2s
+      bus: 0
+  - platform: neopixelbus
+    type: BRG
+    variant: WS2811
+    pin: GPIO33
+    num_leds: ${led_count_2}
+    id: led_strip_2
+    internal: true
+    method:
+      type: esp32_i2s
+      bus: 1
