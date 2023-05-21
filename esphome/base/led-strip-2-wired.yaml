@@ -18,7 +18,7 @@ ethernet:
   mdc_pin: GPIO23
   mdio_pin: GPIO18
   clk_mode: GPIO0_IN
-  phy_addr: 0
+  phy_addr: 1
 
 wled:
 
