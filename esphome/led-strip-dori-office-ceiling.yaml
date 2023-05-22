@@ -1,15 +1,21 @@
 substitutions:
-    friendly_name: "Dori Office Ceiling Strip"
-    device_name: "dori-office-ceiling"
-    led_count_1: "100"
-    led_max_1: "99"
-    led_reverse_1: "false"
-    led_count_2: "50"
-    led_max_2: "49"
-    led_reverse_2: "true"
+  friendly_name: "Dori Office Ceiling Strip"
+  device_name: "dori-office-ceiling"
+  led_count_1: "89"
+  led_max_1: "88"
+  led_reverse_1: "false"
+  led_count_2: "50"
+  led_max_2: "49"
+  led_reverse_2: "true"
 
-logger:
-    baud_rate: 115200
+esphome:
+  on_boot:
+    priority: 600
+    then:
+      - light.turn_on:
+          id: led_strp_partition
+          brightness: 100%
+          effect: wled
 
 packages:
-    custom: !include base/led-strip-2-wired.yaml
+  custom: !include base/led-strip-2-wired.yaml

@@ -25,6 +25,7 @@ wled:
 light:
   - platform: partition
     name: "${friendly_name}"
+    id: led_strp_partition
     restore_mode: ALWAYS_OFF
     segments:
       - id: led_strip_1
@@ -38,8 +39,8 @@ light:
     effects:
       - wled:
   - platform: neopixelbus
-    type: BRG
-    variant: WS2811
+    type: RGB
+    variant: 800KBPS
     pin: GPIO17
     num_leds: ${led_count_1}
     id: led_strip_1
@@ -48,8 +49,8 @@ light:
       type: esp32_i2s
       bus: 0
   - platform: neopixelbus
-    type: BRG
-    variant: WS2811
+    type: RGB
+    variant: 800KBPS
     pin: GPIO33
     num_leds: ${led_count_2}
     id: led_strip_2

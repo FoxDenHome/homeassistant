@@ -1,0 +1,50 @@
+substitutions:
+    friendly_name: "Shaving mirror"
+    device_name: "shaving-mirror"
+
+packages:
+    custom: !include base/custom.yaml
+
+# esphome:
+#   includes:
+#     - components/capacitive_sensor/sensor.h
+#   libraries:
+#     - https://github.com/Doridian/CapacitiveSensor.git#d2683f4abe138e665deea1b333e0efc987b79d43
+# sensor:
+#   - platform: custom
+#     lambda: |-
+#       auto touch = new CapacitiveSensorComponent(D2, D1, 100, CAPDIR_UP);
+#       App.register_component(touch);
+#       return {touch};
+#     sensors:
+#       name: "${friendly_name} Touch"
+
+esp8266:
+    board: d1_mini
+
+output:
+  - platform: esp8266_pwm
+    pin: D5
+    frequency: 1000 Hz
+    id: light_output
+
+light:
+  - platform: monochromatic
+    output: light_output
+    id: light_entity
+    name: "${friendly_name} Light"
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: D1
+      mode:
+        input: true
+        pullup: false
+      inverted: false
+    name: "${friendly_name} Touch"
+    filters:
+      delayed_off: 100ms
+    on_click:
+      then:
+        - light.toggle: light_entity
