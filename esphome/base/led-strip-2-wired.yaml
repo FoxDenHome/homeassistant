@@ -22,6 +22,9 @@ ethernet:
 
 wled:
 
+e131:
+  method: unicast
+
 light:
   - platform: partition
     name: "${friendly_name}"
@@ -38,6 +41,9 @@ light:
         reversed: ${led_reverse_2}
     effects:
       - wled:
+      - e131:
+          universe: 1
+      - addressable_rainbow:
   - platform: neopixelbus
     type: RGB
     variant: 800KBPS
