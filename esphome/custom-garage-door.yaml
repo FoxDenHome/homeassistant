@@ -1,61 +1,66 @@
 substitutions:
-    friendly_name: "Garage door"
-    device_name: "garage-door"
+  friendly_name: "Garage door"
+  device_name: "garage-door"
 
 packages:
-    custom: !include base/custom.yaml
+  custom: !include base/custom.yaml
 
 esp8266:
-    board: esp8285
-    early_pin_init: false
+  board: esp8285
+  early_pin_init: false
 
 binary_sensor:
-    - platform: gpio
-      name: "${friendly_name} Contact"
-      device_class: garage_door
-      id: contact
-      pin:
-        number: GPIO4
-        inverted: true
-      filters:
-          - delayed_on: 20ms
-
-    - platform: gpio
-      name: "${friendly_name} Button"
-      internal: true
-      pin:
-        number: GPIO14
-        mode: INPUT_PULLUP
-        inverted: true
+  - platform: gpio
+    device_class: garage_door
+    id: contact
+    internal: true
+    pin:
+      number: GPIO4
+      inverted: true
+    filters:
+      - delayed_on: 20ms
+  - platform: gpio
+    id: case_button
+    internal: true
+    pin:
+      number: GPIO14
+      mode: INPUT_PULLUP
+      inverted: true
 
 switch:
-    - platform: gpio
-      pin: GPIO5
-      name: "${friendly_name} Relay"
-      id: relay
-      internal: true
-      restore_mode: ALWAYS_OFF
-      on_turn_on:
-          - light.turn_on: wifi_led
-          - delay: 1s
-          - switch.turn_off: relay
-          - light.turn_off: wifi_led
+  - platform: gpio
+    pin: GPIO5
+    id: relay
+    internal: true
+    restore_mode: ALWAYS_OFF
+    on_turn_on:
+      - light.turn_on: wifi_led
+      - delay: 1s
+      - switch.turn_off: relay
+      - light.turn_off: wifi_led
 
 light:
-    - platform: status_led
-      name: "${friendly_name} Status LED"
-      id: wifi_led
-      pin: GPIO12
-      internal: true
+  - platform: status_led
+    id: wifi_led
+    pin: GPIO12
+    internal: true
 
 cover:
-    - platform: template
-      device_class: garage
-      name: "${friendly_name}"
-      lambda: "return id(contact).state ? COVER_OPEN : COVER_CLOSED;"
-      open_action:
-          - switch.turn_on: relay
-      stop_action:
-          - switch.turn_on: relay
-      close_action:
-          - switch.turn_on: relay
+  - platform: template
+    device_class: garage
+    name: "${friendly_name}"
+    lambda: "return id(contact).state ? COVER_OPEN : COVER_CLOSED;"
+    open_action:
+      - if:
+          condition:
+            binary_sensor.is_off: contact
+          then:
+            - switch.turn_on: relay
+    stop_action:
+      - switch.turn_on: relay
+    close_action:
+      - if:
+          condition:
+            binary_sensor.is_on: contact
+          then:
+            - switch.turn_on: relay

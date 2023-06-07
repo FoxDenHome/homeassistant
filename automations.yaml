@@ -29,3 +29,79 @@
   - service: shell_command.r00t_dori_tv
     data: {}
   mode: single
+- id: '1685771876258'
+  alias: Garage door alert
+  description: ''
+  trigger:
+  - platform: device
+    device_id: 5ca026605c6a09ef4be80ad148590261
+    domain: cover
+    entity_id: cover.garage_door
+    type: opened
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+  condition: []
+  action:
+  - service: notify.telegram_channel
+    data:
+      message: Garage door left open > 15 minutes!
+  mode: single
+- id: '1685771911626'
+  alias: Back door upper alert
+  description: ''
+  trigger:
+  - type: opened
+    platform: device
+    device_id: 3c1c3057d655980c79a50fe262ff2a77
+    entity_id: binary_sensor.back_door_upper_current_status_of_the_door
+    domain: binary_sensor
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+  condition: []
+  action:
+  - service: notify.telegram_channel
+    data:
+      message: Back door upper left open > 15 minutes!
+  mode: single
+- id: '1685771942776'
+  alias: Front door alert
+  description: ''
+  trigger:
+  - type: opened
+    platform: device
+    device_id: 06a9fc45fa9a2de0fe0ddcbcc5d5e30d
+    entity_id: binary_sensor.front_door_current_status_of_the_door
+    domain: binary_sensor
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+  condition: []
+  action:
+  - service: notify.telegram_channel
+    data:
+      message: Front door left open > 15 minutes!
+  mode: single
+- id: '1685771966834'
+  alias: Back door lower
+  description: ''
+  trigger:
+  - type: opened
+    platform: device
+    device_id: 16d20a27a6bfe78b4149e0350eeea91b
+    entity_id: binary_sensor.back_door_lower_iaszone_5
+    domain: binary_sensor
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+  condition: []
+  action:
+  - service: notify.telegram_channel
+    data:
+      message: Back door lower left open > 15 minutes!
+  mode: single
