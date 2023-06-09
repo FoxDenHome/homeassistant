@@ -33,11 +33,12 @@ switch:
     id: relay
     internal: true
     restore_mode: ALWAYS_OFF
+    on_turn_off:
+      - light.turn_off: wifi_led
     on_turn_on:
       - light.turn_on: wifi_led
       - delay: 1s
       - switch.turn_off: relay
-      - light.turn_off: wifi_led
 
 light:
   - platform: status_led
