@@ -2,7 +2,7 @@
 
 #define PACKET_THRESHOLD_MS 5
 #define PACKET_LENGTH 4
-#define HEIGHT_MIN 600
+#define HEIGHT_MIN 500
 #define HEIGHT_MAX 1500
 #define HEIGHT_THROTTLE 100
 

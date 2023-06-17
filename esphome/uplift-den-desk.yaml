@@ -1,0 +1,6 @@
+substitutions:
+  friendly_name: "Den Desk"
+  device_name: "den-desk"
+
+packages:
+  custom: !include base/uplift.yaml
