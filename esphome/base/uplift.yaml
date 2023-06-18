@@ -21,6 +21,13 @@ uart:
         pulldown: false
     baud_rate: 9600
     id: uart_desk
+    # debug:
+    #   direction: BOTH
+    #   dummy_receiver: false
+    #   after:
+    #     timeout: 5ms
+    #   sequence:
+    #     - lambda: UARTDebug::log_string(uart::UART_DIRECTION_RX, bytes);
   - rx_pin:
       number: D7
       mode:
@@ -29,6 +36,13 @@ uart:
         pulldown: false
     baud_rate: 9600
     id: uart_controller
+    # debug:
+    #   direction: BOTH
+    #   dummy_receiver: true
+    #   after:
+    #     timeout: 5ms
+    #   sequence:
+    #     - lambda: UARTDebug::log_string(uart::UART_DIRECTION_TX, bytes);
 
 output:
   - platform: gpio
