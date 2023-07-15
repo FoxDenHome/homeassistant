@@ -1,0 +1,6 @@
+substitutions:
+  friendly_name: "Bathroom lower"
+  device_name: "bathroom-lower"
+
+packages:
+  athom-presence-sensor: !include base/athom-presence-sensor.yaml

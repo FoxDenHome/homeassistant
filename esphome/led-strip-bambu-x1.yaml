@@ -1,0 +1,8 @@
+substitutions:
+  friendly_name: "Bamnu X1 Matrix"
+  device_name: "bambu-x1"
+  led_count_1: "512"
+  led_max_1: "511"
+
+packages:
+  custom: !include base/led-strip-1.yaml

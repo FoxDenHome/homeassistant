@@ -12,10 +12,11 @@ wled:
 
 light:
   - platform: neopixelbus
-    type: BRG
+    type: GRB
     variant: WS2811
-    pin: GPIO13
+    pin: GPIO21
     name: "${friendly_name}"
+    num_leds: ${led_count_1}
     method:
       type: esp32_i2s
       bus: 0

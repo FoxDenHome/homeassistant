@@ -3,7 +3,7 @@ from telnetlib import Telnet
 from socket import socket, AF_INET, SOCK_STREAM
 from time import sleep
 
-IP = "10.2.144.220"
+IP = "10.2.12.29"
 
 def is_port_open(ip: str, port: int):
     sock = socket(AF_INET, SOCK_STREAM)
