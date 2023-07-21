@@ -37,9 +37,6 @@ recorder:
       - sensor.cpu_temperature
       - switch.adaptive_lighting_global
 
-shell_command:
-  r00t_dori_tv: /config/r00t-dori-tv.py
-
 template:
   - sensor:
       - name: "Total Home Power"

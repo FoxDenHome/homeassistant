@@ -10,25 +10,6 @@
     data:
       addon: core_letsencrypt
   mode: single
-- id: '1666477121212'
-  alias: r00t Dori TV
-  description: ''
-  trigger:
-  - platform: device
-    device_id: 90029f686814e691b0859a5e51854bb3
-    domain: media_player
-    entity_id: media_player.dori_office_tv
-    type: turned_on
-  condition: []
-  action:
-  - service: media_player.select_source
-    data:
-      source: Run telnet
-    target:
-      device_id: 90029f686814e691b0859a5e51854bb3
-  - service: shell_command.r00t_dori_tv
-    data: {}
-  mode: single
 - id: '1685771876258'
   alias: Garage door alert
   description: ''
