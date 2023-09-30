@@ -92,7 +92,7 @@ switch:
     internal: true
     entity_category: config
     optimistic: true
-    restore_state: false
+    restore_mode: "DISABLED"
     turn_on_action:
       - uart.write: "sensorStart\r\n"
     turn_off_action:
