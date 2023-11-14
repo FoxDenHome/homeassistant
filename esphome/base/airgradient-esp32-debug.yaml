@@ -65,14 +65,10 @@ sensor:
   - platform: senseair
     id: senseair_co2_sensor
     uart_id: uart_senseair
-    update_interval: 2s
     co2:
       name: "${friendly_name} CO2"
       id: senseair_co2_value
-      filters:
-        - median:
-            window_size: 30
-            send_every: 30
+    update_interval: 60s
 
 button:
   - platform: template
