@@ -58,7 +58,7 @@ api:
     - service: notify
       variables:
         duration: int
-        text: string
+        display: string
         dots: string
         color: int[]
         animations: bool
@@ -69,7 +69,7 @@ api:
             }
 
             const char* dots_c = dots.c_str();
-            const char* text_c = text.c_str();
+            const char* text_c = display.c_str();
             const int dots_len = strlen(dots_c);
             const int text_len = strlen(text_c);
             if (dots_len > 3) {
@@ -88,12 +88,12 @@ api:
             int i;
             // Begins at [8 + 2] = [10,11,12]
             for (i = 1; i <= dots_len; i++) {
-              str[13 - i] = dots[dots_len - i];
+              str[13 - i] = dots_c[dots_len - i];
             }
 
             // Begins at [13] = [13,14,15,16,17,18,19,20,21]
             for (i = 1; i <= text_len; i++) {
-              str[22 - i] = text[text_len - i];
+              str[22 - i] = text_c[text_len - i];
             }
 
             id(uart_main).write_str(str);
