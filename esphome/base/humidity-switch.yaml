@@ -28,7 +28,7 @@ binary_sensor:
     name: "${friendly_name} ${type_prefix} Button"
     internal: true
     on_press:
-      - switch.toggle: relay
+      - fan.toggle: relay_fan
 
 sensor:
   - platform: aht10
@@ -40,21 +40,25 @@ sensor:
 
 status_led:
   pin:
-    number: GPIO12
+    number: GPIO14
     inverted: true
 
 output:
   - platform: gpio
     id: led
     pin:
-      number: GPIO14
+      number: GPIO12
       inverted: true
-
-switch:
   - platform: gpio
-    name: "${friendly_name} Relay"
-    pin: GPIO5
     id: relay
+    pin:
+      number: GPIO5
+
+fan:
+  - platform: binary
+    name: "${friendly_name} ${type_prefix} Fan"
+    output: relay
+    id: relay_fan
     on_turn_on:
       then:
         - output.turn_on: led
