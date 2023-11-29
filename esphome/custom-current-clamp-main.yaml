@@ -23,9 +23,13 @@ ads1115:
 #   - calibrate_linear:
 #       # Measured value of 0 maps to 0A
 #       - 0 -> 0
-#       # Known load: 2.00A
+#       # Known load: 4.00A
 #       # Value shown in logs: 0.028A
 #       - 0.028 -> 4.00
+
+# 0.02988204456
+# 0.00747051114
+# 0.007
 
 sensor:
   - platform: ads1115
@@ -99,9 +103,9 @@ sensor:
           - 0.028 -> 4.00
 
   - platform: homeassistant
-    entity_id: sensor.dori_pc_voltage
+    entity_id: sensor.tesla_wall_connector_grid_voltage
     internal: true
-    id: hot_phase_left_voltage
+    id: both_phase_voltage
 
   - platform: homeassistant
     entity_id: sensor.ups_rack_input_voltage
@@ -116,8 +120,9 @@ sensor:
     unit_of_measurement: W
     update_interval: 10s
     lambda: |-
-      float voltage = id(hot_phase_left_voltage).state;
+      float voltage = id(both_phase_voltage).state - id(hot_phase_right_voltage).state;
       if (isnan(voltage) || voltage < 10.0) {
+        ESP_LOGW("voltage", "hot_phase_left_voltage defaulted to 120!");
         voltage = 120.0;
       }
       return id(host_phase_left_current).state * voltage;
@@ -132,6 +137,7 @@ sensor:
     lambda: |-
       float voltage = id(hot_phase_right_voltage).state;
       if (isnan(voltage) || voltage < 10.0) {
+        ESP_LOGW("voltage", "hot_phase_right_voltage defaulted to 120!");
         voltage = 120.0;
       }
       return id(host_phase_right_current).state * voltage;
