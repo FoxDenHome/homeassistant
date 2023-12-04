@@ -40,14 +40,14 @@ sensor:
 
 status_led:
   pin:
-    number: GPIO14
+    number: GPIO12
     inverted: true
 
 output:
   - platform: gpio
     id: led
     pin:
-      number: GPIO12
+      number: GPIO14
       inverted: true
   - platform: gpio
     id: relay
