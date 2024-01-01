@@ -5,20 +5,6 @@ substitutions:
 packages:
     custom: !include base/custom.yaml
 
-# esphome:
-#   includes:
-#     - components/capacitive_sensor/sensor.h
-#   libraries:
-#     - https://github.com/Doridian/CapacitiveSensor.git#d2683f4abe138e665deea1b333e0efc987b79d43
-# sensor:
-#   - platform: custom
-#     lambda: |-
-#       auto touch = new CapacitiveSensorComponent(D2, D1, 100, CAPDIR_UP);
-#       App.register_component(touch);
-#       return {touch};
-#     sensors:
-#       name: "${friendly_name} Touch"
-
 esp8266:
     board: d1_mini
 
@@ -42,7 +28,8 @@ binary_sensor:
         input: true
         pullup: false
       inverted: false
-    name: "${friendly_name} Touch"
+    internal: true
+    id: touch_sensor
     filters:
       delayed_off: 100ms
     on_click:

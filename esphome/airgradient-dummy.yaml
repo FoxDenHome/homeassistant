@@ -1,6 +1,0 @@
-substitutions:
-  friendly_name: "Dummy"
-  device_name: "dummy"
-
-packages:
-  airgradient: !include base/airgradient-esp32-debug.yaml
