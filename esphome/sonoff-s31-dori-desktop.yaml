@@ -3,4 +3,4 @@ substitutions:
   device_name: "dori-desktop"
 
 packages:
-  sonoff-s31-defon: !include base/sonoff-s31-defon.yaml
+  sonoff-s31: !include base/sonoff-s31.yaml
