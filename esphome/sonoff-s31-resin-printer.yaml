@@ -3,4 +3,4 @@ substitutions:
   device_name: "resin-printer"
 
 packages:
-  sonoff-s31: !include base/sonoff-s31.yaml
+  sonoff-s31-critical: !include base/sonoff-s31-critical.yaml

@@ -9,6 +9,9 @@ esp8266:
   board: esp01_1m
   early_pin_init: false
 
+ota:
+  port: 8266
+
 uart:
   rx_pin: RX
   baud_rate: 4800

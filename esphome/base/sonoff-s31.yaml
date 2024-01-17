@@ -1,9 +1,6 @@
 packages:
   sonoff-s31-super: !include sonoff-s31-super.yaml
 
-esp8266:
-  restore_from_flash: true
-
 switch:
   - platform: gpio
     name: "${friendly_name} Relay"

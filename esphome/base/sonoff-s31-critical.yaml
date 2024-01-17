@@ -1,0 +1,14 @@
+packages:
+  sonoff-s31-super: !include sonoff-s31-super.yaml
+
+switch:
+  - platform: gpio
+    name: "${friendly_name} Relay"
+    pin: GPIO12
+    id: relay
+    on_turn_on:
+      - lambda: |-
+          id(main_ota).set_auth_password(id(breakglass_ota_password));
+    on_turn_off:
+      - lambda: |-
+          id(main_ota).set_auth_password(id(normal_ota_password));
