@@ -15,16 +15,6 @@ ota:
   password: !secret ota_password
   id: main_ota
 
-globals:
-  - id: normal_ota_password
-    type: std::string
-    restore_value: no
-    initial_value: !secret ota_password_quoted
-  - id: breakglass_ota_password
-    type: std::string
-    restore_value: no
-    initial_value: !secret breakglass_ota_password_quoted
-
 button:
   - platform: safe_mode
     name: "${friendly_name} ${type_prefix} Restart in Safe Mode"
