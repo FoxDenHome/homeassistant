@@ -17,6 +17,20 @@ i2c:
   scan: true
   id: bus_a
 
+esphome:
+  includes:
+    - components/hackota/ota.h
+
+ota:
+  on_begin:
+    then:
+      - if:
+          condition:
+            fan.is_on: relay_fan
+          then:
+            - lambda: |-
+                force_close_ota(id(main_ota));
+
 binary_sensor:
   - platform: gpio
     pin:

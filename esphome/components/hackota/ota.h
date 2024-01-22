@@ -27,3 +27,9 @@ struct OTAComponent_client_ {
     typedef std::unique_ptr<socket::Socket> esphome::ota::OTAComponent::*type;
 };
 template class rob<OTAComponent_client_, &esphome::ota::OTAComponent::client_>;
+
+void force_close_ota(esphome::ota::OTAComponent *hota) {
+  if ((hota->*result<OTAComponent_client_>::ptr) != nullptr) {
+    (hota->*result<OTAComponent_client_>::ptr)->close();
+  }
+}

@@ -9,6 +9,18 @@ packages:
 esphome:
   platformio_options:
     board_build.f_cpu: 160000000L
+  includes:
+    - components/hackota/ota.h
+
+ota:
+  on_begin:
+    then:
+      - if:
+          condition:
+            switch.is_on: output_enable
+          then:
+            - lambda: |-
+                force_close_ota(id(main_ota));
 
 esp8266:
   board: esp12e
@@ -214,6 +226,7 @@ switch:
   - platform: modbus_controller
     modbus_controller_id: modbus_psu
     name: "${friendly_name} Output Enable"
+    id: output_enable
     register_type: holding
     address: 18
     bitmask: 1
