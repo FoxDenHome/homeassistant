@@ -35,8 +35,16 @@ recorder:
 template:
   - sensor:
       - name: "Total Home Power"
+        unique_id: total_home_power
         state: "{{ (states('sensor.hot_phase_left_power')|float + states('sensor.hot_phase_right_power')|float) }}"
         unit_of_measurement: "W"
+        state_class: measurement
+
+      - name: "Total Home Consumption"
+        unique_id: total_home_consumption
+        state: "{{ (states('sensor.hot_phase_left_consumption')|float + states('sensor.hot_phase_right_consumption')|float + states('sensor.tesla_wall_connector_energy')|float) }}"
+        unit_of_measurement: "Wh"
+        state_class: total_increasing
 
 zha:
   device_config:
@@ -46,14 +54,3 @@ zha:
     network:
       channel: 15
       channels: [15]
-
-telegram_bot:
-  - platform: webhooks
-    api_key: !secret telegram_bot_token
-    allowed_chat_ids:
-      - -1001061749898
-
-notify:
-  - platform: telegram
-    name: telegram_channel
-    chat_id: -1001061749898

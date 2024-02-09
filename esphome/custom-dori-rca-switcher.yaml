@@ -1,0 +1,95 @@
+substitutions:
+  friendly_name: "Dori RCA switcher"
+  device_name: "dori-rca-switcher"
+
+packages:
+  custom: !include base/custom.yaml
+
+rp2040:
+  board: rpipicow
+  framework:
+    platform_version: https://github.com/maxgerhardt/platform-raspberrypi.git
+
+esphome:
+  includes:
+    - components/latching_relay/relay.h
+    - components/latching_relay/tree.h
+
+number:
+  - platform: template
+    name: "${friendly_name} Input"
+    initial_value: 0
+    min_value: 1
+    max_value: 8
+    step: 1
+    restore_value: true
+    set_action:
+      lambda: write_relay_tree_state((int)x);
+
+switch:
+  - platform: template
+    name: "${friendly_name} Processor In"
+    turn_on_action:
+      then:
+        - switch.turn_off: k1
+    turn_off_action:
+      then:
+        - switch.turn_on: k1
+  - platform: template
+    name: "${friendly_name} Processor Out"
+    turn_on_action:
+      then:
+        - switch.turn_on: k9
+    turn_off_action:
+      then:
+        - switch.turn_off: k9
+  - platform: custom
+    lambda: |-
+        // _ means the pins are switched around
+        auto k1 = new LatchingRelayComponent(9, 8);
+        auto k2 = new LatchingRelayComponent(5, 4);
+        auto k3 = new LatchingRelayComponent(13, 12);
+        auto k4 = new LatchingRelayComponent(3, 2);
+        auto k5 = new LatchingRelayComponent(7, 6);
+        auto k6 = new LatchingRelayComponent(11, 10);
+        auto k7 = new LatchingRelayComponent(15, 14);
+        auto k8_ = new LatchingRelayComponent(16, 17, false);
+        auto k9 = new LatchingRelayComponent(19, 18, false);
+        App.register_component(k1);
+        App.register_component(k2);
+        App.register_component(k3);
+        App.register_component(k4);
+        App.register_component(k5);
+        App.register_component(k6);
+        App.register_component(k7);
+        App.register_component(k8_);
+        App.register_component(k9);
+        return {k1,k2,k3,k4,k5,k6,k7,k8_,k9};
+    switches:
+      - id: k1
+        restore_mode: DISABLED
+        internal: true
+      - id: k2
+        restore_mode: DISABLED
+        internal: true
+      - id: k3
+        restore_mode: DISABLED
+        internal: true
+      - id: k4
+        restore_mode: DISABLED
+        internal: true
+      - id: k5
+        restore_mode: DISABLED
+        internal: true
+      - id: k6
+        restore_mode: DISABLED
+        internal: true
+      - id: k7
+        restore_mode: DISABLED
+        internal: true
+      - id: k8_
+        name: "${friendly_name} Processor In"
+        restore_mode: RESTORE_DEFAULT_OFF
+      - id: k9
+        name: "${friendly_name} Processor Out"
+        restore_mode: RESTORE_DEFAULT_OFF
