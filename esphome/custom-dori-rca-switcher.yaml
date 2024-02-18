@@ -23,6 +23,7 @@ number:
     max_value: 8
     step: 1
     restore_value: true
+    optimistic: true
     set_action:
       lambda: write_relay_tree_state((int)x);
 

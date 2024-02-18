@@ -1,0 +1,187 @@
+substitutions:
+  friendly_name: "Starlight"
+  device_name: "starlight"
+
+packages:
+  custom: !include base/custom.yaml
+
+esphome:
+  includes:
+    - components/telink
+    - components/telink/telink.hpp
+
+esp32:
+  board: wemos_d1_mini32
+
+esp32_ble_tracker:
+
+ble_client:
+  - mac_address: a4:c1:38:d5:fd:e8
+    id: telink_ble
+    on_connect: 
+      then:
+        - delay: 1ms
+        - script.execute: telink_ble_send_pairing
+        - script.wait: telink_ble_send_pairing
+        - delay: 1ms
+        - component.update: blisslights_pairing
+        - delay: 1ms
+        - script.execute: telink_ble_enable_notify
+        - script.wait: telink_ble_enable_notify
+    on_disconnect: 
+      then:
+        - lambda: |-
+            ((TelinkComponent*)(id(telink_light).get_component(0)))->shutdown();
+
+binary_sensor:
+  - platform: template
+    name: "${friendly_name} BLE Connected"
+    lambda: |-
+      if (((TelinkComponent*)(id(telink_light).get_component(0)))->get_is_paired()) {
+        return true;
+      } else {
+        return false;
+      }
+
+light:
+  - platform: rgb
+    name: "${friendly_name} Nebula"
+    red: light_red
+    green: light_green
+    blue: light_blue
+    default_transition_length: 0s
+    flash_transition_length: 0s
+    restore_mode: RESTORE_DEFAULT_OFF
+  - platform: monochromatic
+    name: "${friendly_name} Stars"
+    output: light_laser
+    default_transition_length: 0s
+    flash_transition_length: 0s
+    restore_mode: RESTORE_DEFAULT_OFF
+  
+fan:
+  - platform: speed
+    output: light_motor
+    name: "${friendly_name} Motor"
+    restore_mode: RESTORE_DEFAULT_OFF
+
+switch:
+  - platform: output
+    output: light_breathe
+    name: "${friendly_name} Breathe"
+    restore_mode: RESTORE_DEFAULT_OFF
+
+sensor:
+  - platform: ble_client
+    type: characteristic
+    ble_client_id: telink_ble
+    update_interval: never
+    internal: true
+    notify: true
+    service_uuid: 00010203-0405-0607-0809-0a0b0c0d1910
+    characteristic_uuid: 00010203-0405-0607-0809-0a0b0c0d1911
+    id: blisslights_notify
+    lambda: |-
+      return ((TelinkComponent*)(id(telink_light).get_component(0)))->handle_notify(x);
+  - platform: ble_client
+    type: characteristic
+    ble_client_id: telink_ble
+    update_interval: never
+    internal: true
+    notify: false
+    service_uuid: 00010203-0405-0607-0809-0a0b0c0d1910
+    characteristic_uuid: 00010203-0405-0607-0809-0a0b0c0d1914
+    id: blisslights_pairing
+    lambda: |-
+      return ((TelinkComponent*)(id(telink_light).get_component(0)))->handle_pairing_data(x);
+
+script:
+  - id: telink_ble_enable_notify
+    mode: single
+    then:
+      - ble_client.ble_write:
+          id: telink_ble
+          service_uuid: 00010203-0405-0607-0809-0a0b0c0d1910
+          characteristic_uuid: 00010203-0405-0607-0809-0a0b0c0d1911
+          value: [0x01]
+  - id: telink_set_light
+    mode: queued
+    then:
+      - lambda: !lambda |-
+          ((TelinkComponent*)(id(telink_light).get_component(0)))->set_light();
+  - id: telink_ble_send_command
+    mode: queued
+    parameters:
+      payload: uint8_t[]
+    then:
+      - ble_client.ble_write:
+          id: telink_ble
+          service_uuid: 00010203-0405-0607-0809-0a0b0c0d1910
+          characteristic_uuid: 00010203-0405-0607-0809-0a0b0c0d1912
+          value: !lambda |-
+            return payload;
+  - id: telink_ble_send_pairing
+    mode: single
+    then:
+      - ble_client.ble_write:
+          id: telink_ble
+          service_uuid: 00010203-0405-0607-0809-0a0b0c0d1910
+          characteristic_uuid: 00010203-0405-0607-0809-0a0b0c0d1914
+          value: !lambda |-
+            return ((TelinkComponent*)(id(telink_light).get_component(0)))->make_pairing_data();
+
+custom_component:
+  - id: telink_light
+    lambda: |-
+      auto telink_light = new TelinkComponent(id(telink_ble), id(telink_ble_send_command), "\xa4\xc1\x38\xd5\xfd\xe8", "HMS56WVBEQN2FBG");
+      return {telink_light};
+  
+output:
+  - platform: template
+    id: light_red
+    type: float
+    write_action:
+      then:
+      - lambda: !lambda |-
+          ((TelinkComponent*)(id(telink_light).get_component(0)))->light_red = state * 255.0;
+      - script.execute: telink_set_light
+  - platform: template
+    id: light_green
+    type: float
+    write_action:
+      then:
+      - lambda: !lambda |-
+          ((TelinkComponent*)(id(telink_light).get_component(0)))->light_green = state * 255.0;
+      - script.execute: telink_set_light
+  - platform: template
+    id: light_blue
+    type: float
+    write_action:
+      then:
+      - lambda: !lambda |-
+          ((TelinkComponent*)(id(telink_light).get_component(0)))->light_blue = state * 255.0;
+      - script.execute: telink_set_light
+  - platform: template
+    id: light_laser
+    type: float
+    write_action:
+      then:
+      - lambda: !lambda |-
+          ((TelinkComponent*)(id(telink_light).get_component(0)))->light_laser = state * 255.0;
+      - script.execute: telink_set_light
+  - platform: template
+    id: light_motor
+    type: float
+    write_action:
+      then:
+      - lambda: !lambda |-
+          ((TelinkComponent*)(id(telink_light).get_component(0)))->light_motor = state * 255.0;
+      - script.execute: telink_set_light
+  - platform: template
+    id: light_breathe
+    type: binary
+    write_action:
+      then:
+      - lambda: !lambda |-
+          ((TelinkComponent*)(id(telink_light).get_component(0)))->light_breathe = state;
+      - script.execute: telink_set_light
