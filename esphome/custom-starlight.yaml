@@ -13,6 +13,20 @@ esphome:
 esp32:
   board: wemos_d1_mini32
 
+wifi:
+  ap:
+    ssid: Starlight_A4C138D5FDE8_Hotspot"
+    password: !secret starlight_password
+
+captive_portal:
+
+web_server:
+  auth:
+    username: starlight
+    password: !secret starlight_password
+  local: true
+  version: 2
+
 esp32_ble_tracker:
 
 ble_client:
