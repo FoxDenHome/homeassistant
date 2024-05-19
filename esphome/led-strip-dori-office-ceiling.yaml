@@ -19,3 +19,7 @@ esphome:
 
 packages:
   custom: !include base/led-strip-2-wired.yaml
+
+#  led_count_1: "300"
+#packages:
+#  custom: !include base/led-strip-1-wired.yaml

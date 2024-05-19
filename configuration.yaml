@@ -31,6 +31,9 @@ recorder:
       - device_tracker.thotmobile_location_tracker
       - sensor.cpu_temperature
       - switch.adaptive_lighting_global
+      - sensor.delta_pro_301319_remain
+      - sensor.delta_pro_301319_remain_charge
+      - sensor.delta_pro_301319_remain_discharge
 
 template:
   - sensor:
