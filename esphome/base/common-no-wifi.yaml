@@ -13,6 +13,7 @@ api:
 
 ota:
   password: !secret ota_password
+  platform: esphome
   id: main_ota
 
 button:
