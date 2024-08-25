@@ -1,5 +1,5 @@
 #include "esphome.h"
-#include "esphome/components/ota/ota_component.h"
+#include "esphome/components/esphome/ota/ota_esphome.h"
 
 template<typename Tag>
 struct result {
@@ -24,11 +24,11 @@ template<typename Tag, typename Tag::type p>
 typename rob<Tag, p>::filler rob<Tag, p>::filler_obj;
 
 struct OTAComponent_client_ {
-    typedef std::unique_ptr<socket::Socket> esphome::ota::OTAComponent::*type;
+    typedef std::unique_ptr<socket::Socket> esphome::ESPHomeOTAComponent::*type;
 };
-template class rob<OTAComponent_client_, &esphome::ota::OTAComponent::client_>;
+template class rob<OTAComponent_client_, &esphome::ESPHomeOTAComponent::client_>;
 
-void force_close_ota(esphome::ota::OTAComponent *hota) {
+void force_close_ota(esphome::ESPHomeOTAComponent *hota) {
   if ((hota->*result<OTAComponent_client_>::ptr) != nullptr) {
     (hota->*result<OTAComponent_client_>::ptr)->close();
   }
