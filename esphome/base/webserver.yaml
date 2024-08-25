@@ -4,7 +4,7 @@ web_server:
     username: !secret web_user
     password: !secret web_password
   local: true
-  version: 2
+  version: 3
   include_internal: true
 
 prometheus:

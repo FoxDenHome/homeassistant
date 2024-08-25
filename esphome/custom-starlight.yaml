@@ -13,9 +13,12 @@ esphome:
 esp32:
   board: wemos_d1_mini32
 
+api:
+  reboot_timeout: 0s
+
 wifi:
   ap:
-    ssid: Starlight_A4C138D5FDE8_Hotspot"
+    ssid: Starlight_A4C138D5FDE8_Hotspot
     password: !secret starlight_password
 
 captive_portal:
@@ -25,7 +28,8 @@ web_server:
     username: starlight
     password: !secret starlight_password
   local: true
-  version: 2
+  version: 3
+  include_internal: false
 
 esp32_ble_tracker:
 
@@ -65,19 +69,19 @@ light:
     blue: light_blue
     default_transition_length: 0s
     flash_transition_length: 0s
-    restore_mode: RESTORE_DEFAULT_OFF
+    restore_mode: RESTORE_DEFAULT_ON
   - platform: monochromatic
     name: "${friendly_name} Stars"
     output: light_laser
     default_transition_length: 0s
     flash_transition_length: 0s
-    restore_mode: RESTORE_DEFAULT_OFF
+    restore_mode: RESTORE_DEFAULT_ON
   
 fan:
   - platform: speed
     output: light_motor
     name: "${friendly_name} Motor"
-    restore_mode: RESTORE_DEFAULT_OFF
+    restore_mode: RESTORE_DEFAULT_ON
 
 switch:
   - platform: output
