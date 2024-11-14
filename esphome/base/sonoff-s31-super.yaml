@@ -1,6 +1,7 @@
 substitutions:
   type_prefix: "Sonoff S31"
   type_prefix_host: "sonoff-s31"
+  update_interval: 60s
 
 packages:
   common: !include common.yaml
@@ -35,15 +36,23 @@ sensor:
     current:
       name: "${friendly_name} Current"
       accuracy_decimals: 1
+      filters:
+        - throttle_average: ${update_interval}
     voltage:
       name: "${friendly_name} Voltage"
       accuracy_decimals: 1
+      filters:
+        - throttle_average: ${update_interval}
     power:
       name: "${friendly_name} Power"
       accuracy_decimals: 1
+      filters:
+        - throttle_average: ${update_interval}
     energy:
       name: "${friendly_name} Energy"
       accuracy_decimals: 1
+      filters:
+        - throttle_average: ${update_interval}
 
 status_led:
   pin:
