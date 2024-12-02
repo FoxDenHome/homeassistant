@@ -7,6 +7,8 @@ packages:
 
 esp32:
   board: wemos_d1_mini32
+  framework:
+    type: esp-idf
 
 logger:
   level: DEBUG
@@ -16,6 +18,14 @@ i2c:
   scl: D1
   scan: true
   id: bus_a
+
+bluetooth_proxy:
+  active: false
+
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 1100ms
+    window: 1100ms
 
 uart:
   - rx_pin: D5
@@ -65,14 +75,10 @@ sensor:
   - platform: senseair
     id: senseair_co2_sensor
     uart_id: uart_senseair
-    update_interval: 2s
+    update_interval: 60s
     co2:
       name: "${friendly_name} CO2"
       id: senseair_co2_value
-      filters:
-        - median:
-            window_size: 30
-            send_every: 30
 
 button:
   - platform: template
