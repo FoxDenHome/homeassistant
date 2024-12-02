@@ -7,8 +7,6 @@ packages:
 
 rp2040:
   board: rpipicow
-  framework:
-    platform_version: https://github.com/maxgerhardt/platform-raspberrypi.git
 
 esphome:
   includes:
