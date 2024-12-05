@@ -4,7 +4,6 @@
 /node-red
 /www/community
 /themes/metro
-
 /secrets.yaml
 
 *.log
@@ -13,3 +12,5 @@
 *.db
 *.db-shm
 *.db-wal
+
+/.*.august.conf
