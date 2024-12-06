@@ -1,0 +1,15 @@
+substitutions:
+  type_prefix: "BTProxy"
+  type_prefix_host: "btproxy"
+
+packages:
+  connon: !include common-no-wifi.yaml
+
+bluetooth_proxy:
+  active: true
+
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 1100ms
+    window: 1100ms
+    active: true

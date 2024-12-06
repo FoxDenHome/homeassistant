@@ -10,6 +10,9 @@ esp32:
   framework:
     type: esp-idf
 
+logger:
+  level: DEBUG
+
 i2c:
   sda: D2
   scl: D1
