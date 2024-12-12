@@ -49,6 +49,18 @@ template:
         unit_of_measurement: "Wh"
         state_class: total_increasing
 
+      - name: "AMS 1 Absolute Humidity"
+        unique_id: ams_1_absolute_humidity
+        state: >-
+          {% set h, t = states('sensor.ams_1_humidity') | float, states('sensor.ams_1_temperature') %}
+          {% if not h or t == 'unknown' -%}
+            'unknown'
+          {%- else %}
+            {% set t = t | float %}
+            {{ (h*6.112*2.1674*e**((t*17.67)/(t+243.5))/(t+273.15))|round(2) }}
+          {% endif %}
+        unit_of_measurement: "g/m³"
+
 zha:
   device_config:
     f4:b3:b1:ff:fe:f2:22:b6-1:
