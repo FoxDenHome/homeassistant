@@ -1,12 +1,12 @@
-- id: '1629160586788'
-  alias: LetsEncrypt check
-  description: ''
-  trigger:
-  - platform: time
-    at: 04:00
-  condition: []
-  action:
-  - service: hassio.addon_start
-    data:
-      addon: core_letsencrypt
+- id: "1735978124624"
+  alias: LetsEncrypt Check
+  description: ""
+  triggers:
+    - at: 04:00
+      trigger: time
+  conditions: []
+  actions:
+    - data:
+        addon: core_letsencrypt
+      action: hassio.addon_start
   mode: single
