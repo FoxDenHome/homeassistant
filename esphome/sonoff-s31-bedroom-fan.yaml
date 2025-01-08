@@ -1,6 +1,0 @@
-substitutions:
-  friendly_name: "Bedroom Fan"
-  device_name: "bedroom-fan"
-
-packages:
-  sonoff-s31: !include base/sonoff-s31.yaml

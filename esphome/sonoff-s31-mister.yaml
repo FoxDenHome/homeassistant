@@ -1,6 +1,0 @@
-substitutions:
-  friendly_name: "MiSTer"
-  device_name: "mister"
-
-packages:
-  sonoff-s31: !include base/sonoff-s31.yaml

@@ -1,6 +1,0 @@
-substitutions:
-  friendly_name: "Wizzy Office Fan"
-  device_name: "wizzy-office-fan"
-
-packages:
-  sonoff-s31: !include base/sonoff-s31.yaml
