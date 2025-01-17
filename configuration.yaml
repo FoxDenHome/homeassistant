@@ -65,6 +65,8 @@ zha:
   device_config:
     f4:b3:b1:ff:fe:f2:22:b6-1:
       type: "switch"
+    f4:b3:b1:ff:fe:f2:1a:5f-1:
+      type: "switch"
   zigpy_config:
     network:
       channel: 15
