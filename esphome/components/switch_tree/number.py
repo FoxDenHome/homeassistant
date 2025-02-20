@@ -16,7 +16,7 @@ CONF_S5 = "s5_id"
 CONF_S6 = "s6_id"
 CONF_S7 = "s7_id"
 
-CONF_SCHEMA = cv.All(
+CONFIG_SCHEMA = cv.All(
     cv.Schema({
         cv.Required(CONF_S1): cv.use_id(switch.Switch),
         cv.Required(CONF_S2): cv.use_id(switch.Switch),

@@ -12,7 +12,7 @@ CONF_SET_PIN = "set_pin"
 CONF_RESET_PIN = "reset_pin"
 CONF_IS_ASSUMED_STATE = "is_assumed_state"
 
-CONF_SCHEMA = cv.All(
+CONFIG_SCHEMA = cv.All(
     cv.Schema({
         cv.Required(CONF_SET_PIN): cv.int_,
         cv.Required(CONF_RESET_PIN): cv.int_,
