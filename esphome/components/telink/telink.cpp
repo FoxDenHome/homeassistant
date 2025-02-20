@@ -1,8 +1,8 @@
 #include "esphome.h"
 #include <string.h>
 
-#include "./telink.hpp"
-#include "./tinyaes.h"
+#include "telink.h"
+#include "tinyaes.h"
 
 using esphome::esp_log_printf_;
 
@@ -119,7 +119,14 @@ static int telink_aes_ivm_decrypt(uint8_t* dst, const uint8_t *key, const uint8_
     return 0;
 }
 
-TelinkComponent::TelinkComponent(esphome::ble_client::BLEClient* client, esphome::script::Script<std::vector<uint8_t>>* command_script, const char* mac, const char* name) {
+#define COMMAND_BASE_LEN (3 + 2 + 2 + 1 + 2)
+#define COMMAND_MAX_PAYLOAD 10
+#define COMMAND_FULL_LEN (COMMAND_BASE_LEN + COMMAND_MAX_PAYLOAD)
+
+namespace esphome {
+namespace telink {
+
+Telink::Telink(esphome::ble_client::BLEClient* client, esphome::script::Script<std::vector<uint8_t>>* command_script, const char* mac, const char* name) {
     this->command_script = command_script;
     memcpy(this->mac, mac, 6);
     reverse_len(this->reversed_mac, this->mac, 6);
@@ -144,9 +151,10 @@ TelinkComponent::TelinkComponent(esphome::ble_client::BLEClient* client, esphome
     this->light_brightness = 0xFF;
     this->light_breathe = false;
     this->is_paired = false;
+    this->publish_state(false);
 }
 
-float TelinkComponent::handle_notify(std::vector<uint8_t> payload_vec) {
+float Telink::handle_notify(std::vector<uint8_t> payload_vec) {
     if (!this->is_paired) {
         ESP_LOGW("telink_notify", "Got notify when not paired!");
         return -1.0;
@@ -184,7 +192,7 @@ float TelinkComponent::handle_notify(std::vector<uint8_t> payload_vec) {
     return 1.0;
 }
 
-float TelinkComponent::handle_pairing_data(std::vector<uint8_t> payload) {
+float Telink::handle_pairing_data(std::vector<uint8_t> payload) {
     if (payload[0] != BLE_GATT_OP_PAIR_ENC_RSP) {
         ESP_LOGW("telink_pairing", "invalid pairing response");
         return -1.0;
@@ -220,17 +228,19 @@ float TelinkComponent::handle_pairing_data(std::vector<uint8_t> payload) {
     this->vendor_id = 0x0211;
 
     this->is_paired = true;
+    this->publish_state(true);
     this->send_command(COMMAND_FIND_MESH, NULL, 0);
     ESP_LOGI("telink_pairing", "Mesh find command sent!");
 
     return 1.0;
 }
 
-void TelinkComponent::shutdown() {
+void Telink::shutdown() {
     this->is_paired = false;
+    this->publish_state(false);
 }
 
-std::vector<uint8_t> TelinkComponent::make_pairing_data() {
+std::vector<uint8_t> Telink::make_pairing_data() {
     uint8_t mesh_xor[16];
     bytes_xor_16(mesh_xor, this->name, this->mesh_password);
 
@@ -252,11 +262,7 @@ std::vector<uint8_t> TelinkComponent::make_pairing_data() {
     return full_login_packet;
 }
 
-#define COMMAND_BASE_LEN (3 + 2 + 2 + 1 + 2)
-#define COMMAND_MAX_PAYLOAD 10
-#define COMMAND_FULL_LEN (COMMAND_BASE_LEN + COMMAND_MAX_PAYLOAD)
-
-void TelinkComponent::send_command(const uint8_t command, const uint8_t* payload, const int payload_len) {
+void Telink::send_command(const uint8_t command, const uint8_t* payload, const int payload_len) {
     if (!this->is_paired) {
         ESP_LOGW("telink_command", "Got command when not paired!");
         return;
@@ -303,7 +309,7 @@ void TelinkComponent::send_command(const uint8_t command, const uint8_t* payload
     this->command_script->execute(full_encrypted_vector);
 }
 
-void TelinkComponent::set_light() {
+void Telink::set_light() {
     uint8_t set_light_data[8];
     set_light_data[0] = LIGHT_SET_DIRECT;
     set_light_data[1] = this->light_red;
@@ -317,7 +323,7 @@ void TelinkComponent::set_light() {
     this->send_command(COMMAND_LIGHT_CONTROL, set_light_data, 8);
 }
 
-void TelinkComponent::make_ivm(uint8_t* ivm, const uint32_t sequence_number) {
+void Telink::make_ivm(uint8_t* ivm, const uint32_t sequence_number) {
     memcpy(ivm, this->reversed_mac, 4);
     ivm[4] = 1;
     ivm[5] = sequence_number & 0xFF;
@@ -325,7 +331,10 @@ void TelinkComponent::make_ivm(uint8_t* ivm, const uint32_t sequence_number) {
     ivm[7] = (sequence_number >> 16) & 0xFF;
 }
 
-void TelinkComponent::make_ivs(uint8_t* ivm, uint8_t* payload) {
+void Telink::make_ivs(uint8_t* ivm, uint8_t* payload) {
     memcpy(ivm, this->reversed_mac, 3);
     memcpy(ivm + 3, payload, 5);
+}
+
+}
 }

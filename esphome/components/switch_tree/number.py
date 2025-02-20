@@ -8,23 +8,23 @@ SwitchTree = switch_tree_ns.class_(
     "SwitchTree", number.Number, cg.Component
 )
 
-CONFIG_S1 = "s1_id"
-CONFIG_S2 = "s2_id"
-CONFIG_S3 = "s3_id"
-CONFIG_S4 = "s4_id"
-CONFIG_S5 = "s5_id"
-CONFIG_S6 = "s6_id"
-CONFIG_S7 = "s7_id"
+CONF_S1 = "s1_id"
+CONF_S2 = "s2_id"
+CONF_S3 = "s3_id"
+CONF_S4 = "s4_id"
+CONF_S5 = "s5_id"
+CONF_S6 = "s6_id"
+CONF_S7 = "s7_id"
 
-CONFIG_SCHEMA = cv.All(
+CONF_SCHEMA = cv.All(
     cv.Schema({
-        cv.Required(CONFIG_S1): cv.use_id(switch.Switch),
-        cv.Required(CONFIG_S2): cv.use_id(switch.Switch),
-        cv.Required(CONFIG_S3): cv.use_id(switch.Switch),
-        cv.Required(CONFIG_S4): cv.use_id(switch.Switch),
-        cv.Required(CONFIG_S5): cv.use_id(switch.Switch),
-        cv.Required(CONFIG_S6): cv.use_id(switch.Switch),
-        cv.Required(CONFIG_S7): cv.use_id(switch.Switch),
+        cv.Required(CONF_S1): cv.use_id(switch.Switch),
+        cv.Required(CONF_S2): cv.use_id(switch.Switch),
+        cv.Required(CONF_S3): cv.use_id(switch.Switch),
+        cv.Required(CONF_S4): cv.use_id(switch.Switch),
+        cv.Required(CONF_S5): cv.use_id(switch.Switch),
+        cv.Required(CONF_S6): cv.use_id(switch.Switch),
+        cv.Required(CONF_S7): cv.use_id(switch.Switch),
         cv.Optional(CONF_RESTORE_VALUE, default=True): cv.boolean,
     })
     .extend(number.number_schema(
@@ -34,13 +34,13 @@ CONFIG_SCHEMA = cv.All(
 )
 
 async def to_code(config):
-    s1 = await cg.get_variable(config[CONFIG_S1])
-    s2 = await cg.get_variable(config[CONFIG_S2])
-    s3 = await cg.get_variable(config[CONFIG_S3])
-    s4 = await cg.get_variable(config[CONFIG_S4])
-    s5 = await cg.get_variable(config[CONFIG_S5])
-    s6 = await cg.get_variable(config[CONFIG_S6])
-    s7 = await cg.get_variable(config[CONFIG_S7])
+    s1 = await cg.get_variable(config[CONF_S1])
+    s2 = await cg.get_variable(config[CONF_S2])
+    s3 = await cg.get_variable(config[CONF_S3])
+    s4 = await cg.get_variable(config[CONF_S4])
+    s5 = await cg.get_variable(config[CONF_S5])
+    s6 = await cg.get_variable(config[CONF_S6])
+    s7 = await cg.get_variable(config[CONF_S7])
 
     var = cg.new_Pvariable(
         config[CONF_ID],

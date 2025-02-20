@@ -3,9 +3,12 @@
 #include "esphome.h"
 #include <string.h>
 
-class TelinkComponent : public esphome::Component {
+namespace esphome {
+namespace telink {
+
+class Telink : public esphome::Component, public esphome::binary_sensor::BinarySensor {
 public:
-    TelinkComponent(esphome::ble_client::BLEClient* client, esphome::script::Script<std::vector<uint8_t>>* command_script, const char* mac, const char* name);
+    Telink(esphome::ble_client::BLEClient* client, esphome::script::Script<std::vector<uint8_t>>* command_script, const char* mac, const char* name);
 
     float handle_notify(std::vector<uint8_t> payload);
     float handle_pairing_data(std::vector<uint8_t> payload);
@@ -45,3 +48,6 @@ protected:
     esphome::script::Script<>* notify_script;
     esphome::script::Script<std::vector<uint8_t>>* command_script;
 };
+
+}
+}

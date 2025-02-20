@@ -8,15 +8,15 @@ LatchingRelay = latching_relay_ns.class_(
     "LatchingRelay", switch.Switch, cg.Component
 )
 
-CONFIG_SET_PIN = "set_pin"
-CONFIG_RESET_PIN = "reset_pin"
-CONFIG_IS_ASSUMED_STATE = "is_assumed_state"
+CONF_SET_PIN = "set_pin"
+CONF_RESET_PIN = "reset_pin"
+CONF_IS_ASSUMED_STATE = "is_assumed_state"
 
-CONFIG_SCHEMA = cv.All(
+CONF_SCHEMA = cv.All(
     cv.Schema({
-        cv.Required(CONFIG_SET_PIN): cv.int_,
-        cv.Required(CONFIG_RESET_PIN): cv.int_,
-        cv.Optional(CONFIG_IS_ASSUMED_STATE, default=True): cv.boolean,
+        cv.Required(CONF_SET_PIN): cv.int_,
+        cv.Required(CONF_RESET_PIN): cv.int_,
+        cv.Optional(CONF_IS_ASSUMED_STATE, default=True): cv.boolean,
     })
     .extend(switch.switch_schema(
         LatchingRelay,
@@ -25,6 +25,6 @@ CONFIG_SCHEMA = cv.All(
 )
 
 async def to_code(config):
-    var = cg.new_Pvariable(config[CONF_ID], config[CONFIG_SET_PIN], config[CONFIG_RESET_PIN], config[CONFIG_IS_ASSUMED_STATE])
+    var = cg.new_Pvariable(config[CONF_ID], config[CONF_SET_PIN], config[CONF_RESET_PIN], config[CONF_IS_ASSUMED_STATE])
     await cg.register_component(var, config)
     await switch.register_switch(var, config)
