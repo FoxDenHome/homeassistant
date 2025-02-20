@@ -1,5 +1,10 @@
 packages:
-  common-nsto-wifi: !include common-no-wifi.yaml
+  common-no-wifi: !include common-no-wifi.yaml
+
+external_components:
+  - source:
+      type: local
+      path: components
 
 wifi:
   ssid: !secret wifi_ssid

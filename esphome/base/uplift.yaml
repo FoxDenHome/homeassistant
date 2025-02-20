@@ -8,10 +8,6 @@ packages:
 esp8266:
   board: d1_mini
 
-esphome:
-  includes:
-    - components/uplift/uart.h
-
 uart:
   - rx_pin:
       number: D1
@@ -111,12 +107,7 @@ button:
       - output.turn_off: button_bit4
 
 sensor:
-  - platform: template
+  - id: desk_height
+    uart_id: uart_desk
+    platform: uplift
     name: "${friendly_name} Height"
-    id: desk_height
-    unit_of_measurement: "mm"
-
-custom_component:
-  - lambda: |-
-      auto desk_serial = new UpliftDeskSerialComponent(id(uart_desk));
-      return {desk_serial};

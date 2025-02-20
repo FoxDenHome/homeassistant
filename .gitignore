@@ -5,6 +5,7 @@
 /www/community
 /themes/metro
 /secrets.yaml
+/netdata
 
 *.log
 *.log.*

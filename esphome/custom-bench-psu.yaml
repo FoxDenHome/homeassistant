@@ -9,8 +9,6 @@ packages:
 esphome:
   platformio_options:
     board_build.f_cpu: 160000000L
-  includes:
-    - components/hackota/ota.h
 
 ota:
   on_begin:
