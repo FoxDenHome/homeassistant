@@ -8,71 +8,80 @@ packages:
 rp2040:
   board: rpipicow
 
-esphome:
-  includes:
-    - components/latching_relay/relay.h
-    - components/latching_relay/tree.h
-
 number:
-  - platform: template
+  - platform: switch_tree
     name: "${friendly_name} Input"
-    initial_value: 0
-    min_value: 1
-    max_value: 8
-    step: 1
+    s1_id: k1
+    s2_id: k2
+    s3_id: k3
+    s4_id: k4
+    s5_id: k5
+    s6_id: k6
+    s7_id: k7
     restore_value: true
-    optimistic: true
-    set_action:
-      lambda: write_relay_tree_state((int)x);
+    #optimistic: true
 
 switch:
-  - platform: custom
-    lambda: |-
-        // _ means the pins are switched around
-        auto k1 = new LatchingRelayComponent(9, 8);
-        auto k2 = new LatchingRelayComponent(5, 4);
-        auto k3 = new LatchingRelayComponent(13, 12);
-        auto k4 = new LatchingRelayComponent(3, 2);
-        auto k5 = new LatchingRelayComponent(7, 6);
-        auto k6 = new LatchingRelayComponent(11, 10);
-        auto k7 = new LatchingRelayComponent(15, 14);
-        auto k8_ = new LatchingRelayComponent(16, 17, false);
-        auto k9 = new LatchingRelayComponent(19, 18, false);
-        App.register_component(k1);
-        App.register_component(k2);
-        App.register_component(k3);
-        App.register_component(k4);
-        App.register_component(k5);
-        App.register_component(k6);
-        App.register_component(k7);
-        App.register_component(k8_);
-        App.register_component(k9);
-        return {k1,k2,k3,k4,k5,k6,k7,k8_,k9};
-    switches:
-      - id: k1
-        restore_mode: DISABLED
-        internal: true
-      - id: k2
-        restore_mode: DISABLED
-        internal: true
-      - id: k3
-        restore_mode: DISABLED
-        internal: true
-      - id: k4
-        restore_mode: DISABLED
-        internal: true
-      - id: k5
-        restore_mode: DISABLED
-        internal: true
-      - id: k6
-        restore_mode: DISABLED
-        internal: true
-      - id: k7
-        restore_mode: DISABLED
-        internal: true
-      - id: k8_
-        name: "${friendly_name} Processor In"
-        restore_mode: RESTORE_DEFAULT_OFF
-      - id: k9
-        name: "${friendly_name} Processor Out"
-        restore_mode: RESTORE_DEFAULT_OFF
+  - id: k1
+    name: k1
+    restore_mode: DISABLED
+    internal: true
+    platform: latching_relay
+    set_pin: 9
+    reset_pin: 8
+  - id: k2
+    name: k2
+    restore_mode: DISABLED
+    internal: true
+    platform: latching_relay
+    set_pin: 5
+    reset_pin: 4
+  - id: k3
+    name: k3
+    restore_mode: DISABLED
+    internal: true
+    platform: latching_relay
+    set_pin: 13
+    reset_pin: 12
+  - id: k4
+    name: k4
+    restore_mode: DISABLED
+    internal: true
+    platform: latching_relay
+    set_pin: 3
+    reset_pin: 2
+  - id: k5
+    name: k5
+    restore_mode: DISABLED
+    internal: true
+    platform: latching_relay
+    set_pin: 7
+    reset_pin: 6
+  - id: k6
+    name: k6
+    restore_mode: DISABLED
+    internal: true
+    platform: latching_relay
+    set_pin: 11
+    reset_pin: 10
+  - id: k7
+    name: k7
+    restore_mode: DISABLED
+    internal: true
+    platform: latching_relay
+    set_pin: 15
+    reset_pin: 14
+  - id: k8_
+    name: "${friendly_name} Processor In"
+    restore_mode: RESTORE_DEFAULT_OFF
+    is_assumed_state: false
+    platform: latching_relay
+    set_pin: 16
+    reset_pin: 17
+  - id: k9
+    name: "${friendly_name} Processor Out"
+    restore_mode: RESTORE_DEFAULT_OFF
+    is_assumed_state: false
+    platform: latching_relay
+    set_pin: 19
+    reset_pin: 18
